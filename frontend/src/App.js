@@ -75,7 +75,8 @@ export default function App() {
     title: '',
     files: [],
     action: 'delete', // 'delete', 'move', or 'remove'
-    moveTarget: null
+    moveTarget: null,
+    stage: null
   });
   const [fileLists, setFileLists] = useState({
     photoFiles: [],
@@ -235,12 +236,34 @@ export default function App() {
     });
 
     s.on("status", (status) => {
+      console.log('Frontend: Received status:', status);
+      console.log('Status has fileLists?', !!status.fileLists);
+      console.log('Status has progress.fileLists?', !!status.progress?.fileLists);
+      
       const rawStage = status.Stage || status.stage || "idle";
       
       // Normalize all scanning/analyzing stages to just "scanning"
       let newStage = rawStage;
       if (rawStage.includes("scanning") || rawStage.includes("analyzing")) {
         newStage = "scanning";
+      } else if (rawStage === "aborted") {
+        // When operation is aborted, reset everything to idle state
+        newStage = "idle";
+        setProgress({
+          TotalVideos: 0,
+          ProcessedVideos: 0,
+          PhotosToDelete: 0,
+          VideosToDelete: 0,
+          FoldersToDelete: 0,
+          VideosToMove: 0,
+        });
+        setLogs([]);
+        setFileLists({
+          photoFiles: [],
+          shortVideos: [],
+          longVideos: [],
+          emptyFolders: []
+        });
       }
       
       setDetailedStage(rawStage);
@@ -274,15 +297,41 @@ export default function App() {
           stage: newStage
         }));
         
-        // Update file lists if available
-        if (status.fileLists) {
-          setFileLists(status.fileLists);
+        // Update file lists if available (check both locations)
+        const fileListsData = status.fileLists || status.progress?.fileLists;
+        if (fileListsData) {
+          console.log('Updating fileLists during scanning:', fileListsData);
+          console.log('FileLists structure:', {
+            photoFiles: fileListsData.photoFiles?.length || 0,
+            shortVideos: fileListsData.shortVideos?.length || 0,
+            longVideos: fileListsData.longVideos?.length || 0,
+            emptyFolders: fileListsData.emptyFolders?.length || 0
+          });
+          
+          // Ensure fileListsData is valid before setting state
+          if (fileListsData && typeof fileListsData === 'object' && fileListsData !== false && fileListsData !== null) {
+            setFileLists(fileListsData);
+          } else {
+            console.warn('Invalid fileListsData received during scanning, preserving existing fileLists:', fileListsData);
+          }
+          
+          // Ensure progress counts match actual file counts to prevent inconsistency
+          setProgress(prev => ({
+            ...prev,
+            PhotosToDelete: fileListsData.photoFiles?.length || 0,
+            VideosToDelete: fileListsData.shortVideos?.length || 0,
+            VideosToMove: fileListsData.longVideos?.length || 0,
+            FoldersToDelete: fileListsData.emptyFolders?.length || 0
+          }));
         }
       }
       
-      // Final results when done
-      if (newStage === "done") {
-        if (status.progress) {
+      // Final results when done, or loaded scan results when waiting
+      if (newStage === "done" || newStage === "waiting") {
+        // Check if we have meaningful progress data (not just an empty object)
+        const hasProgressData = status.progress && Object.keys(status.progress).length > 0;
+        
+        if (hasProgressData) {
           setProgress({...status.progress, stage: newStage});
         } else if (status.PhotosToDelete !== undefined) {
           setProgress({
@@ -294,6 +343,71 @@ export default function App() {
             VideosToMove: status.VideosToMove || 0,
             stage: newStage
           });
+        } else if (newStage === "done") {
+          // Cleanup completed with empty/no progress data - preserve existing progress counts
+          console.log('Cleanup completed with no meaningful progress data - preserving existing counts');
+          setProgress(prev => ({
+            ...prev,
+            stage: newStage
+          }));
+        }
+        
+        // Update file lists if available in final status (check both locations)
+        const fileListsData = status.fileLists || status.progress?.fileLists;
+        if (fileListsData) {
+          console.log('Updating fileLists in final status (done/waiting):', fileListsData);
+          console.log('Final FileLists structure:', {
+            photoFiles: fileListsData.photoFiles?.length || 0,
+            shortVideos: fileListsData.shortVideos?.length || 0,
+            longVideos: fileListsData.longVideos?.length || 0,
+            emptyFolders: fileListsData.emptyFolders?.length || 0
+          });
+          
+          // Ensure fileListsData is valid before setting state
+          if (fileListsData && typeof fileListsData === 'object' && fileListsData !== false && fileListsData !== null) {
+            setFileLists(fileListsData);
+          } else {
+            console.warn('Invalid fileListsData received in final status, preserving existing fileLists:', fileListsData);
+          }
+          
+          // Ensure progress counts match actual file counts to prevent inconsistency
+          setProgress(prev => ({
+            ...prev,
+            PhotosToDelete: fileListsData.photoFiles?.length || 0,
+            VideosToDelete: fileListsData.shortVideos?.length || 0,
+            VideosToMove: fileListsData.longVideos?.length || 0,
+            FoldersToDelete: fileListsData.emptyFolders?.length || 0
+          }));
+        } else if (newStage === "done") {
+          // For cleanup completion without fileLists, preserve existing fileLists
+          // This allows users to still preview what was processed
+          console.log('Cleanup completed without fileLists - preserving existing file data for preview');
+          
+          // Ensure fileLists remain valid objects if they were corrupted
+          setFileLists(prev => {
+            if (!prev || typeof prev !== 'object' || prev === false || prev === null) {
+              console.warn('FileLists state was corrupted, resetting to empty structure');
+              return {
+                photoFiles: [],
+                shortVideos: [],
+                longVideos: [],
+                emptyFolders: []
+              };
+            }
+            return prev; // Keep existing valid fileLists
+          });
+          
+          // Check if we received an empty progress object - don't update progress counts in this case
+          // to prevent clearing file counts while preserving fileLists for preview
+          const isEmptyProgress = status.progress && Object.keys(status.progress).length === 0;
+          if (isEmptyProgress) {
+            console.log('Received empty progress object on cleanup completion - preserving existing progress counts');
+            // Don't update progress counts, keep existing ones
+            setProgress(prev => ({
+              ...prev,
+              stage: newStage
+            }));
+          }
         }
       }
 
@@ -352,8 +466,8 @@ export default function App() {
       setErrors(prev => [...prev, typeof msg === 'string' ? msg : JSON.stringify(msg)]);
     });
 
-    s.on("logFiles", (files) => {
-      console.log("Log files received:", files);
+    s.on("operationLogs", (files) => {
+      console.log("Operation logs received:", files);
       setLogFiles(files);
     });
 
@@ -518,8 +632,16 @@ export default function App() {
   }, [socket]);
 
   const abortOperation = useCallback(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.log('No socket connection for abort');
+      return;
+    }
+    
+    console.log('Abort button pressed');
     socket.emit("abortOperation");
+    
+    // Don't reset state immediately - wait for backend confirmation
+    // The status event handler will handle the reset when "aborted" status is received
   }, [socket]);
 
   const startCleanup = useCallback(() => {
@@ -633,11 +755,16 @@ export default function App() {
 
   // Function to load and start from scan results
   const loadScanResults = useCallback((scanResultsPath) => {
+    console.log("=== LOAD SCAN RESULTS FUNCTION CALLED ===");
+    console.log("scanResultsPath:", scanResultsPath);
+    
     if (!socket) {
+      console.log("No socket available");
       setErrors(prev => [...prev, "Not connected to server"]);
       return;
     }
 
+    console.log("Socket available, proceeding with load");
     console.log("LOAD SCAN RESULTS: Loading from path:", scanResultsPath);
     console.log("LOAD SCAN RESULTS: Current progress state before loading:", progress);
 
@@ -681,6 +808,17 @@ export default function App() {
     });
   };
 
+  // Debug: Track fileLists state changes
+  useEffect(() => {
+    console.log('FileLists state changed:', {
+      photoFiles: fileLists.photoFiles ? fileLists.photoFiles.length : 0,
+      shortVideos: fileLists.shortVideos ? fileLists.shortVideos.length : 0,
+      longVideos: fileLists.longVideos ? fileLists.longVideos.length : 0,
+      emptyFolders: fileLists.emptyFolders ? fileLists.emptyFolders.length : 0,
+      actual: fileLists
+    });
+  }, [fileLists]);
+
   // Check if cleanup can be started
   const canStart = socket && 
     connectionStatus === "connected" && 
@@ -720,40 +858,97 @@ export default function App() {
 
   // Function to open file list modal for different file types
   const openFileListModal = useCallback((type) => {
+    console.log('openFileListModal called with type:', type);
+    console.log('Current fileLists state:', fileLists);
+    console.log('Current progress state:', progress);
+    
     let title = '';
     let files = [];
     let action = 'delete';
     let moveTarget = null;
     let fileType = '';
 
+    // Get the current fileLists to ensure we have the latest data
+    // Add safety check for corrupted fileLists state
+    let currentFileLists = fileLists;
+    if (!currentFileLists || typeof currentFileLists !== 'object' || currentFileLists === false || currentFileLists === null) {
+      console.warn('FileLists state is corrupted:', currentFileLists, 'using empty structure');
+      currentFileLists = {
+        photoFiles: [],
+        shortVideos: [],
+        longVideos: [],
+        emptyFolders: []
+      };
+    }
+
     switch (type) {
       case 'photos':
         title = `Photos to Delete (${progress.PhotosToDelete})`;
-        files = fileLists.photoFiles || [];
+        files = currentFileLists.photoFiles || [];
         action = 'delete';
         fileType = 'photoFiles';
         break;
       case 'shortVideos':
         title = `Short Videos to Delete (${progress.VideosToDelete})`;
-        files = fileLists.shortVideos || [];
+        files = currentFileLists.shortVideos || [];
         action = 'delete';
         fileType = 'shortVideos';
         break;
       case 'longVideos':
         title = `Videos to Move (${progress.VideosToMove})`;
-        files = fileLists.longVideos || [];
+        files = currentFileLists.longVideos || [];
         action = 'move';
         moveTarget = videoMoveTarget;
         fileType = 'longVideos';
         break;
       case 'emptyFolders':
         title = `Empty Folders to Remove (${progress.FoldersToDelete})`;
-        files = fileLists.emptyFolders || [];
+        files = currentFileLists.emptyFolders || [];
         action = 'remove';
         fileType = 'emptyFolders';
         break;
       default:
+        console.error('Unknown file type:', type);
         return;
+    }
+
+    console.log('Modal data prepared:', { 
+      title, 
+      filesCount: files.length, 
+      action, 
+      fileType,
+      firstFile: files[0] ? { name: files[0].name, path: files[0].path } : 'No files' 
+    });
+    
+    // Double-check that we have files before opening modal
+    if (files.length === 0) {
+      console.warn('No files found for type:', type, 'in fileLists:', currentFileLists);
+      console.warn('Progress counts show:', {
+        PhotosToDelete: progress.PhotosToDelete,
+        VideosToDelete: progress.VideosToDelete,
+        VideosToMove: progress.VideosToMove,
+        FoldersToDelete: progress.FoldersToDelete
+      });
+      
+      // Show a helpful message to the user instead of an empty modal
+      let message = `No files available for preview.`;
+      
+      if (stage === "done") {
+        message = `No files to preview - cleanup operation completed.\n\nThe files that were scheduled for ${action === 'delete' ? 'deletion' : action === 'move' ? 'moving' : 'removal'} have been processed. `;
+        if (action === 'delete') {
+          message += `Deleted files have been moved to trash.`;
+        } else if (action === 'move') {
+          message += `Videos have been moved to: ${moveTarget}`;
+        } else {
+          message += `Empty folders have been removed.`;
+        }
+        message += `\n\nTo see current files, run a fresh scan.`;
+      } else {
+        message += ` This might happen if:\n- The scan results haven't been loaded yet\n- The files were moved or deleted since the last scan\n- This is an old scan result\n\nTry running a fresh scan to see current files.`;
+      }
+      
+      alert(message);
+      return;
     }
 
     setFileListModalData({ 
@@ -761,10 +956,11 @@ export default function App() {
       files, 
       action, 
       moveTarget,
+      stage: stage, // Pass current stage to modal
       onFilesExcluded: (excludedFilePaths) => handleFilesExcluded(excludedFilePaths, fileType)
     });
     setShowFileListModal(true);
-  }, [progress, fileLists, videoMoveTarget, handleFilesExcluded]);
+  }, [progress, fileLists, videoMoveTarget, handleFilesExcluded, stage]);
 
   // Function to close file list modal
   const closeFileListModal = useCallback(() => {
@@ -774,6 +970,7 @@ export default function App() {
       files: [], 
       action: 'delete', 
       moveTarget: null,
+      stage: null,
       onFilesExcluded: null
     });
   }, []);
@@ -1209,6 +1406,29 @@ export default function App() {
             >
               📁 Load Scan Results
             </button>
+
+            {/* Cancel button - only show when operation is running */}
+            {(stage === "running" || stage === "scanning" || stage === "waiting") && (
+              <button
+                onClick={abortOperation}
+                style={{
+                  padding: "10px 20px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  backgroundColor: "#f44336",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  transition: "background-color 0.3s",
+                  marginTop: "10px",
+                  marginLeft: "10px",
+                }}
+                title="Cancel the current operation"
+              >
+                ❌ Cancel Operation
+              </button>
+            )}
 
             <button
               onClick={testProgressData}
@@ -1961,7 +2181,7 @@ export default function App() {
                 style={{
                   backgroundColor: "#e3f2fd",
                   color: "#1565c0",
-                  padding: "10px 15px",
+                                   padding: "10px 15px",
                   borderRadius: "8px",
                   marginBottom: "15px",
                   fontWeight: "bold",
@@ -2415,6 +2635,7 @@ export default function App() {
         files={fileListModalData.files}
         action={fileListModalData.action}
         moveTarget={fileListModalData.moveTarget}
+        stage={fileListModalData.stage}
         onFilesExcluded={fileListModalData.onFilesExcluded}
       />
     </ErrorBoundary>

@@ -7,6 +7,7 @@ const FileListModal = ({
   files, 
   action, // 'delete', 'move', or 'remove'
   moveTarget = null,
+  stage = null, // Current application stage
   onFilesExcluded = null // Callback when files are excluded
 }) => {
   const [excludedFiles, setExcludedFiles] = useState(new Set());
@@ -516,7 +517,50 @@ const FileListModal = ({
               textAlign: 'center',
               color: '#666'
             }}>
-              No files to display
+              {stage === "done" ? (
+                <>
+                  <h4 style={{ color: '#28a745', marginBottom: '15px' }}>✅ Operation Completed</h4>
+                  <p style={{ fontSize: '14px', lineHeight: '1.5', marginBottom: '15px' }}>
+                    The cleanup operation has finished successfully.
+                  </p>
+                  <div style={{ 
+                    background: '#f8f9fa', 
+                    padding: '15px', 
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    lineHeight: '1.6'
+                  }}>
+                    {action === 'delete' && <p><strong>Files deleted:</strong> Moved to trash/recycle bin</p>}
+                    {action === 'move' && <p><strong>Files moved to:</strong> {moveTarget}</p>}
+                    {action === 'remove' && <p><strong>Empty folders:</strong> Removed from system</p>}
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#666', marginTop: '15px' }}>
+                    Run a fresh scan to see the current state of your files.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h4 style={{ color: '#999', marginBottom: '15px' }}>No files to display</h4>
+                  <p style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                    This could happen if:
+                  </p>
+                  <ul style={{ 
+                    textAlign: 'left', 
+                    display: 'inline-block', 
+                    fontSize: '13px',
+                    color: '#777',
+                    lineHeight: '1.6'
+                  }}>
+                    <li>The scan results haven't been loaded yet</li>
+                    <li>Files were moved or deleted since the last scan</li>
+                    <li>This is an old scan result with no matching files</li>
+                    <li>The verification process filtered out all files</li>
+                  </ul>
+                  <p style={{ fontSize: '13px', color: '#999', marginTop: '15px' }}>
+                    Try running a fresh scan to see current files.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div>
@@ -600,6 +644,101 @@ const FileListModal = ({
                         }}>
                           {file.path}
                         </div>
+                        
+                        {/* Show directory contents for folders with non-media files */}
+                        {action === 'remove' && file.hasNonMediaFiles && file.nonMediaFiles && (
+                          <div style={{
+                            marginTop: '8px',
+                            padding: '8px',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '4px',
+                            border: '1px solid #dee2e6'
+                          }}>
+                            <div style={{
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                              color: '#dc3545',
+                              marginBottom: '4px'
+                            }}>
+                              ⚠️ Contains {file.nonMediaFiles.length} non-media file(s):
+                            </div>
+                            {file.nonMediaFiles.slice(0, 5).map((nonMediaFile, idx) => (
+                              <div key={idx} style={{
+                                fontSize: '10px',
+                                color: '#666',
+                                marginLeft: '12px',
+                                wordBreak: 'break-all',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                              }}>
+                                • {nonMediaFile.name} ({formatFileSize(nonMediaFile.size)})
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewFile(nonMediaFile);
+                                    setShowPreview(true);
+                                  }}
+                                  style={{
+                                    padding: '1px 4px',
+                                    fontSize: '8px',
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '2px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Preview file content"
+                                >
+                                  👁️
+                                </button>
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const response = await fetch('/api/open-file', {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ filePath: nonMediaFile.path })
+                                      });
+                                      
+                                      if (!response.ok) {
+                                        throw new Error('Failed to open file');
+                                      }
+                                    } catch (error) {
+                                      console.error('Error opening file:', error);
+                                      alert('Failed to open file with system application');
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '1px 4px',
+                                    fontSize: '8px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '2px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Open with system default application"
+                                >
+                                  📂
+                                </button>
+                              </div>
+                            ))}
+                            {file.nonMediaFiles.length > 5 && (
+                              <div style={{
+                                fontSize: '10px',
+                                color: '#666',
+                                marginLeft: '12px',
+                                fontStyle: 'italic'
+                              }}>
+                                ... and {file.nonMediaFiles.length - 5} more files
+                              </div>
+                            )}
+                          </div>
+                        )}
                         
                         <div style={{
                           display: 'flex',
@@ -743,9 +882,266 @@ const FileListModal = ({
           </div>
         </div>
       </div>
+
+      {/* File Preview Modal for Non-Media Files */}
+      {showPreview && previewFile && (
+        <FilePreviewModal
+          file={previewFile}
+          onClose={() => {
+            setShowPreview(false);
+            setPreviewFile(null);
+          }}
+        />
+      )}
     </div>
       )}
     </>
+  );
+};
+
+// Component for previewing non-media files
+const FilePreviewModal = ({ file, onClose }) => {
+  const [previewContent, setPreviewContent] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    const loadPreview = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Determine if file is text-based for preview
+        const textExtensions = [
+          'txt', 'log', 'md', 'json', 'xml', 'html', 'htm', 'css', 'js', 
+          'ts', 'py', 'java', 'c', 'cpp', 'h', 'csv', 'ini', 'cfg', 'conf'
+        ];
+        
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        const isTextFile = textExtensions.includes(ext);
+        
+        if (!isTextFile) {
+          setPreviewContent(`File type '.${ext}' cannot be previewed as text.`);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch file content for preview
+        const response = await fetch(`/api/file?file=${encodeURIComponent(file.path)}&t=${Date.now()}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load file content');
+        }
+        
+        const text = await response.text();
+        
+        // Limit preview to first 5000 characters to prevent UI freeze
+        const maxChars = 5000;
+        const preview = text.length > maxChars 
+          ? text.substring(0, maxChars) + '\n\n... (File truncated for preview. File has ' + text.length + ' total characters)'
+          : text;
+          
+        setPreviewContent(preview);
+        
+      } catch (err) {
+        console.error('Preview error:', err);
+        setError(err.message || 'Unknown error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (file) {
+      loadPreview();
+    }
+  }, [file]);
+
+  const handleOpenFile = async () => {
+    try {
+      const response = await fetch('/api/open-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filePath: file.path })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to open file');
+      }
+    } catch (error) {
+      console.error('Error opening file:', error);
+      alert('Failed to open file with system application');
+    }
+  };
+
+  const handleOpenFolder = async () => {
+    try {
+      const folderPath = file.path.split('\\').slice(0, -1).join('\\') || file.path.split('/').slice(0, -1).join('/');
+      
+      const response = await fetch('/api/open-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filePath: folderPath })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to open folder');
+      }
+    } catch (error) {
+      console.error('Error opening folder:', error);
+      alert('Failed to open folder');
+    }
+  };
+
+  if (!file) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 11000 // Higher than main modal
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        maxWidth: '80vw',
+        maxHeight: '80vh',
+        width: '800px',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '15px 20px',
+          borderBottom: '1px solid #dee2e6',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: '#f8f9fa'
+        }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '16px' }}>File Preview</h4>
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+              {file.name} ({file.size ? `${Math.round(file.size / 1024)} KB` : 'Size unknown'})
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '18px',
+              cursor: 'pointer',
+              padding: '0',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+          padding: '15px'
+        }}>
+          {isLoading && (
+            <div style={{ textAlign: 'center', color: '#666' }}>
+              Loading file preview...
+            </div>
+          )}
+          
+          {error && (
+            <div style={{ textAlign: 'center', color: '#dc3545' }}>
+              Error: {error}
+            </div>
+          )}
+          
+          {!isLoading && !error && (
+            <pre style={{
+              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+              fontSize: '12px',
+              lineHeight: '1.4',
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}>
+              {previewContent}
+            </pre>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: '10px 20px',
+          borderTop: '1px solid #dee2e6',
+          backgroundColor: '#f8f9fa',
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'flex-end'
+        }}>
+          <button
+            onClick={handleOpenFolder}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#17a2b8',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+            title="Open folder and select this file"
+          >
+            📁 Open Folder
+          </button>
+          <button
+            onClick={handleOpenFile}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Open with System App
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

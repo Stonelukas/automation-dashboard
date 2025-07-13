@@ -60,6 +60,33 @@ function ensureHiddenDirectories() {
 // Initialize hidden directories
 ensureHiddenDirectories();
 
+// Global variables for debouncing scan results emissions
+let scanResultsEmitTimeout = null;
+let lastScanResultsData = null;
+
+// Debounced emit function for scan results to prevent duplicates
+function emitScanResults(socket) {
+  // Clear any existing timeout
+  if (scanResultsEmitTimeout) {
+    clearTimeout(scanResultsEmitTimeout);
+  }
+  
+  // Set new timeout to emit scan results
+  scanResultsEmitTimeout = setTimeout(() => {
+    const scanResults = getScanResults();
+    const dataString = JSON.stringify(scanResults);
+    
+    // Only emit if data has actually changed
+    if (dataString !== lastScanResultsData) {
+      socket.emit('scanResults', scanResults);
+      lastScanResultsData = dataString;
+      console.log(`Emitted scan results: ${scanResults.length} entries`);
+    }
+    
+    scanResultsEmitTimeout = null;
+  }, 500); // 500ms delay to debounce multiple calls
+}
+
 // Function to get scan results from hidden directory
 function getScanResults() {
   try {
@@ -74,13 +101,32 @@ function getScanResults() {
           const content = fs.readFileSync(filePath, 'utf8');
           const jsonData = JSON.parse(content);
           
-          return {
+          // Transform the data structure to match frontend expectations
+          const transformedData = {
             fileName: file,
             filePath: filePath,
             modifiedTime: stats.mtime,
             size: stats.size,
-            ...jsonData
+            startFolder: jsonData.startFolder,
+            timestamp: jsonData.timestamp,
+            videoMoveTarget: jsonData.videoMoveTarget,
+            configuration: jsonData.configuration,
+            // Create summary object from scanResults data
+            summary: {
+              totalPhotos: jsonData.scanResults?.totalPhotos || 0,
+              totalShortVideos: jsonData.scanResults?.totalShortVideos || 0,
+              totalLongVideos: jsonData.scanResults?.totalLongVideos || 0,
+              totalEmptyFolders: jsonData.scanResults?.totalEmptyFolders || 0
+            },
+            totalFiles: (jsonData.scanResults?.totalPhotos || 0) + 
+                       (jsonData.scanResults?.totalShortVideos || 0) + 
+                       (jsonData.scanResults?.totalLongVideos || 0) + 
+                       (jsonData.scanResults?.totalEmptyFolders || 0),
+            // Keep the original scanResults for backwards compatibility
+            scanResults: jsonData.scanResults
           };
+          
+          return transformedData;
         } catch (parseError) {
           console.error(`Error parsing scan result file ${file}:`, parseError);
           return {
@@ -89,10 +135,10 @@ function getScanResults() {
             modifiedTime: stats.mtime,
             size: stats.size,
             summary: {
-              photos: 0,
-              longVideos: 0,
-              shortVideos: 0,
-              emptyFolders: 0
+              totalPhotos: 0,
+              totalLongVideos: 0,
+              totalShortVideos: 0,
+              totalEmptyFolders: 0
             },
             totalFiles: 0,
             startFolder: 'Unknown',
@@ -119,6 +165,9 @@ function getOperationLogs() {
         const filePath = path.join(OPERATION_LOGS_DIR, file);
         const stats = fs.statSync(filePath);
         return {
+          name: file,
+          path: filePath,
+          size: stats.size,
           fileName: file,
           filePath: filePath,
           modifiedTime: stats.mtime
@@ -141,7 +190,7 @@ io.on('connection', (socket) => {
   fileOpsService = new FileOperationsService(io);
 
   // Send initial data when client connects
-  socket.emit('scanResults', getScanResults());
+  emitScanResults(socket);
   socket.emit('operationLogs', getOperationLogs());
 
   // Handle start scan only
@@ -168,21 +217,25 @@ io.on('connection', (socket) => {
       const scanResults = await fileOpsService.performScan(config);
       
       if (scanResults && !fileOpsService.shouldAbort) {
-        // Save scan results
-        const scanResultsPath = path.join(SCAN_RESULTS_DIR, `scan_results_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
-        await fileOpsService.saveScanResults(scanResultsPath, scanResults.photoFiles, scanResults.shortVideos, scanResults.longVideos, scanResults.emptyFolders, config);
-        
-        // Send status with counts
+        // Don't save scan results here - performScan already saves them
+        // Just send status with counts and file lists
         fileOpsService.emitStageStatus('done', {
           PhotosToDelete: scanResults.photoFiles.length,
           VideosToDelete: scanResults.shortVideos.length,
           FoldersToDelete: scanResults.emptyFolders.length,
-          VideosToMove: scanResults.longVideos.length
+          VideosToMove: scanResults.longVideos.length,
+          // Include the actual file lists for the frontend
+          fileLists: {
+            photoFiles: scanResults.photoFiles,
+            shortVideos: scanResults.shortVideos,
+            longVideos: scanResults.longVideos,
+            emptyFolders: scanResults.emptyFolders
+          }
         }, false);
         
         // Refresh scan results list
         setTimeout(() => {
-          socket.emit('scanResults', getScanResults());
+          emitScanResults(socket);
         }, 1000);
       }
     } catch (error) {
@@ -201,15 +254,28 @@ io.on('connection', (socket) => {
     }
 
     try {
+      // Check if this is a revert operation
+      if (params.RevertLogPath) {
+        console.log('Starting revert operation with log path:', params.RevertLogPath);
+        await fileOpsService.revertOperation(params.RevertLogPath);
+        
+        // Refresh logs and scan results after revert
+        setTimeout(() => {
+          socket.emit('operationLogs', getOperationLogs());
+        }, 1000);
+        
+        return;
+      }
+
       const config = {
         startFolder: params.StartFolder,
         minVideoLengthSec: parseInt(params.MinVideoLengthSec) || 30,
         photoExtensions: params.PhotoExtensions || 'jpg,jpeg,png,gif,bmp,tiff',
         videoExtensions: params.VideoExtensions || 'mp4,avi,mov,wmv,flv,mkv,webm',
-        deleteEmptyFolders: true,
-        moveVideos: true,
+        deleteEmptyFolders: params.DeleteEmptyFolders !== undefined ? params.DeleteEmptyFolders : true,
+        moveVideos: params.MoveVideos !== undefined ? params.MoveVideos : true,
         ignoreFolders: params.IgnoreFolders || [],
-        videoMoveTarget: path.join(params.StartFolder, 'SortedVideos')
+        videoMoveTarget: params.VideoMoveTarget || path.join(params.StartFolder, 'SortedVideos')
       };
 
       // First perform scan
@@ -225,7 +291,14 @@ io.on('connection', (socket) => {
         PhotosToDelete: scanResults.photoFiles.length,
         VideosToDelete: scanResults.shortVideos.length,
         FoldersToDelete: scanResults.emptyFolders.length,
-        VideosToMove: scanResults.longVideos.length
+        VideosToMove: scanResults.longVideos.length,
+        // Include the actual file lists for the frontend (same as scan-only)
+        fileLists: {
+          photoFiles: scanResults.photoFiles,
+          shortVideos: scanResults.shortVideos,
+          longVideos: scanResults.longVideos,
+          emptyFolders: scanResults.emptyFolders
+        }
       }, params.DryRun || false);
 
       // Store scan results for confirmation
@@ -261,13 +334,46 @@ io.on('connection', (socket) => {
       // Verify files still exist
       const verifiedData = await fileOpsService.verifyLoadedFiles(loadedScan.scanResults);
       
+      console.log('Server: Verified data counts:', {
+        photos: verifiedData.photoFiles.length,
+        shortVideos: verifiedData.shortVideos.length,
+        longVideos: verifiedData.longVideos.length,
+        emptyFolders: verifiedData.emptyFolders.length
+      });
+      
+      // Debug: Log what we're about to send
+      console.log('Server: About to emit status with fileLists. FileLists structure:', {
+        photoFiles: verifiedData.photoFiles.length,
+        shortVideos: verifiedData.shortVideos.length,
+        longVideos: verifiedData.longVideos.length,
+        emptyFolders: verifiedData.emptyFolders.length,
+        hasPhotoFiles: !!verifiedData.photoFiles,
+        hasShortVideos: !!verifiedData.shortVideos,
+        hasLongVideos: !!verifiedData.longVideos,
+        hasEmptyFolders: !!verifiedData.emptyFolders
+      });
+      
       // Send status with verified counts
       fileOpsService.emitStageStatus('waiting', {
         PhotosToDelete: verifiedData.photoFiles.length,
         VideosToDelete: verifiedData.shortVideos.length,
         FoldersToDelete: verifiedData.emptyFolders.length,
-        VideosToMove: verifiedData.longVideos.length
+        VideosToMove: verifiedData.longVideos.length,
+        // Include the actual file lists for the frontend
+        fileLists: {
+          photoFiles: verifiedData.photoFiles,
+          shortVideos: verifiedData.shortVideos,
+          longVideos: verifiedData.longVideos,
+          emptyFolders: verifiedData.emptyFolders
+        }
       }, DryRun || false);
+      
+      console.log('Server: Sent status with fileLists counts:', {
+        photos: verifiedData.photoFiles.length,
+        shortVideos: verifiedData.shortVideos.length,
+        longVideos: verifiedData.longVideos.length,
+        emptyFolders: verifiedData.emptyFolders.length
+      });
 
       // Store verified results for confirmation
       socket.pendingScanResults = verifiedData;
@@ -302,7 +408,7 @@ io.on('connection', (socket) => {
 
       // Refresh logs and scan results
       setTimeout(() => {
-        socket.emit('scanResults', getScanResults());
+        emitScanResults(socket);
         socket.emit('operationLogs', getOperationLogs());
       }, 1000);
 
@@ -321,11 +427,14 @@ io.on('connection', (socket) => {
   socket.on('cancel', () => {
     console.log('Cancel action received');
     
-    if (fileOpsService) {
+    if (fileOpsService && fileOpsService.getIsRunning()) {
       fileOpsService.abort();
+      console.log('Operation cancelled by user request');
+    } else {
+      console.log('No operation running to cancel');
     }
     
-    // Clear pending data
+    // Clear any pending data
     delete socket.pendingScanResults;
     delete socket.pendingConfig;
     delete socket.pendingDryRun;
@@ -670,15 +779,20 @@ process.on('SIGTERM', () => {
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received. Shutting down gracefully...');
+  console.log('SIGINT received. Aborting operations but keeping server running...');
   
   // Abort any running file operations
   if (fileOpsService) {
     fileOpsService.abort();
+    // Emit abort status to all connected clients
+    io.emit('status', {
+      stage: 'aborted',
+      progress: {},
+      isDryRun: false
+    });
   }
   
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
+  // Don't shut down the server - just abort the operation
+  // This allows the frontend to continue working and load scan results
+  console.log('Operations aborted. Server continues running.');
 });
