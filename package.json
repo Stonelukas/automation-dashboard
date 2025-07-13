@@ -1,0 +1,24 @@
+{
+  "name": "automation-dashboard",
+  "version": "1.0.0",
+  "description": "File cleanup automation dashboard with real-time progress tracking",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "start:prod": "npm run build:frontend && npm run start:backend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "clean": "cd frontend && rmdir /s /q build 2>nul || true && cd ../backend && rmdir /s /q node_modules 2>nul || true && cd ../frontend && rmdir /s /q node_modules 2>nul || true"
+  },
+  "keywords": ["automation", "file-cleanup", "dashboard", "react", "nodejs"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}

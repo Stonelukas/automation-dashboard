@@ -1,0 +1,51 @@
+.dashboard {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  margin: auto;
+  text-align: center;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.status,
+.progress {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.logs {
+  margin-top: 20px;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.logs ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.logs li {
+  font-size: 14px;
+  color: #555;
+}
