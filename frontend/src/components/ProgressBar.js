@@ -2,12 +2,12 @@ import React from 'react';
 
 const ProgressBar = ({ progress, stage, onFileListAction, className = '' }) => {
   // Handle both old and new progress formats
-  const photosToDelete = progress?.PhotosToDelete || progress?.photosToDelete || 0;
-  const videosToDelete = progress?.VideosToDelete || progress?.videosToDelete || 0;
-  const videosToMove = progress?.VideosToMove || progress?.videosToMove || 0;
-  const foldersToDelete = progress?.FoldersToDelete || progress?.foldersToDelete || 0;
-  const processedVideos = progress?.ProcessedVideos || progress?.processed || 0;
-  const totalVideos = progress?.TotalVideos || progress?.total || 0;
+  const photosToDelete = progress?.photosToDelete || progress?.PhotosToDelete || 0;
+  const videosToDelete = progress?.videosToDelete || progress?.VideosToDelete || 0;
+  const videosToMove = progress?.videosToMove || progress?.VideosToMove || 0;
+  const foldersToDelete = progress?.foldersToDelete || progress?.FoldersToDelete || 0;
+  const processedVideos = progress?.processed || progress?.ProcessedVideos || 0;
+  const totalVideos = progress?.total || progress?.TotalVideos || 0;
 
   // Calculate percentage for scanning progress
   const scanningPercentage = totalVideos > 0 ? Math.min(100, Math.round((processedVideos / totalVideos) * 100)) : 0;
@@ -67,17 +67,28 @@ const ProgressBar = ({ progress, stage, onFileListAction, className = '' }) => {
       
       {/* Modern Progress Bar */}
       <div className="relative mb-6">
-        <div className="w-full h-3 bg-secondary-bg rounded-full overflow-hidden">
+        <div className="w-full h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
           <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
+            className="h-full rounded-full transition-all duration-150 ease-linear relative"
             style={{
               width: `${stageDisplay.progress}%`,
-              background: `linear-gradient(90deg, ${stageDisplay.color}, ${stageDisplay.color}99)`
+              background: `linear-gradient(90deg, ${stageDisplay.color}, ${stageDisplay.color}bb)`,
+              boxShadow: `0 0 15px ${stageDisplay.color}77`,
+              willChange: 'width'
             }}
-          />
+          >
+            {/* Animated shine effect */}
+            <div 
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                animation: (stageDisplay.progress > 0 && stageDisplay.progress < 100) ? 'shine 2s ease-in-out infinite' : 'none'
+              }}
+            />
+          </div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-white drop-shadow-md">
+          <span className="text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             {stageDisplay.progress}%
           </span>
         </div>

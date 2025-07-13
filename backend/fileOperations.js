@@ -66,10 +66,10 @@ class FileOperationsService {
         progress: {
           ProcessedVideos: 0,
           TotalVideos: 0,
-          PhotosToDelete: 0,
-          VideosToDelete: 0,
-          FoldersToDelete: 0,
-          VideosToMove: 0
+          photosToDelete: 0,
+          videosToDelete: 0,
+          foldersToDelete: 0,
+          videosToMove: 0
         }
       });
     }
@@ -81,8 +81,14 @@ class FileOperationsService {
       const progressData = {
         stage: stage,
         logs: this.logs, // Include current logs
-        processed: processed, // Direct property for frontend
-        total: total // Direct property for frontend
+        progress: {
+          ProcessedVideos: processed,
+          TotalVideos: total,
+          photosToDelete: 0,
+          videosToDelete: 0,
+          videosToMove: 0,
+          foldersToDelete: 0
+        }
       };
       
       this.io.emit('status', progressData);
@@ -589,19 +595,6 @@ class FileOperationsService {
     this.shouldAbort = false;
     this.clearLogs(); // Clear previous logs
     
-    // Initialize dynamic counters
-    let photosToDelete = 0;
-    let videosToDelete = 0;
-    let videosToMove = 0;
-    let foldersToDelete = 0;
-    
-    this.emitStageStatus('scanning', {
-      photosToDelete: 0,
-      videosToDelete: 0,
-      videosToMove: 0,
-      foldersToDelete: 0
-    });
-    
     this.emitLog(`Starting file scan in: ${config.startFolder}`);
     
     // Parse extensions - handle both string and array formats
@@ -617,7 +610,7 @@ class FileOperationsService {
     this.emitLog(`Video extensions: ${videoExtensions.join(', ')}`);
     this.emitLog(`Delete empty folders: ${config.deleteEmptyFolders}, Move videos: ${config.moveVideos}`);
     
-    // First pass: Count all files to get total
+    // First pass: Count all files to get total BEFORE starting scan
     this.emitLog('Counting files...');
     const photoCount = await this.countFiles(config.startFolder, photoExtensions, config.ignoreFolders);
     const videoCount = await this.countFiles(config.startFolder, videoExtensions, config.ignoreFolders);
@@ -625,7 +618,22 @@ class FileOperationsService {
     
     this.emitLog(`Found ${totalFiles} files total (${photoCount} photos, ${videoCount} videos)`);
     
+    // Initialize counters with fixed total
     let processedCount = 0;
+    let photosToDelete = 0;
+    let videosToDelete = 0;
+    let videosToMove = 0;
+    let foldersToDelete = 0;
+    
+    // Send initial status with fixed total
+    this.emitStageStatus('scanning', {
+      ProcessedVideos: 0,
+      TotalVideos: totalFiles,
+      photosToDelete: 0,
+      videosToDelete: 0,
+      videosToMove: 0,
+      foldersToDelete: 0
+    });
     
     // Scan for photo files
     this.emitLog('Scanning photo files...');
@@ -637,10 +645,11 @@ class FileOperationsService {
       (count, fileName) => {
         processedCount++;
         photosToDelete = count; // Update dynamic counter
-        this.emitProgress(processedCount, totalFiles, 'scanning');
         
-        // Send dynamic summary update
+        // Send progress update with FIXED total
         this.emitStageStatus('scanning', {
+          ProcessedVideos: processedCount,
+          TotalVideos: totalFiles, // FIXED total, never changes
           photosToDelete: photosToDelete,
           videosToDelete: videosToDelete,
           videosToMove: videosToMove,
@@ -671,11 +680,11 @@ class FileOperationsService {
       config.startFolder,
       (count, fileName) => {
         processedCount++;
-        this.emitProgress(processedCount, totalFiles, 'scanning');
         
-        // Don't update video counters here yet - we need to analyze durations first
-        // Just emit current state
+        // Send progress update with FIXED total
         this.emitStageStatus('scanning', {
+          ProcessedVideos: processedCount,
+          TotalVideos: totalFiles, // FIXED total, never changes
           photosToDelete: photosToDelete,
           videosToDelete: videosToDelete,
           videosToMove: videosToMove,
@@ -697,7 +706,6 @@ class FileOperationsService {
       if (this.shouldAbort) break;
       
       const video = allVideoFiles[i];
-      this.emitProgress(i + 1, allVideoFiles.length, 'scanning');
       
       try {
         const duration = await this.getVideoDuration(video.path);
@@ -748,13 +756,17 @@ class FileOperationsService {
           }
         }
         
-        // Send dynamic summary update after each video analysis
-        this.emitStageStatus('scanning', {
-          photosToDelete: photosToDelete,
-          videosToDelete: videosToDelete,
-          videosToMove: videosToMove,
-          foldersToDelete: foldersToDelete
-        });
+        // Send periodic updates with current counters (every 10 videos or at end)
+        if (i % 10 === 0 || i === allVideoFiles.length - 1) {
+          this.emitStageStatus('scanning', {
+            ProcessedVideos: i + 1, // Actual number of processed videos
+            TotalVideos: totalFiles, // FIXED total, never changes
+            photosToDelete: photosToDelete,
+            videosToDelete: videosToDelete,
+            videosToMove: videosToMove,
+            foldersToDelete: foldersToDelete
+          });
+        }
         
       } catch (error) {
         this.emitLog(`Error analyzing video ${video.name}: ${error.message}`);
@@ -763,14 +775,6 @@ class FileOperationsService {
           duration: null // Add null duration for error case
         }); // Default to long video on error (safer)
         videosToMove = longVideos.length; // Update counter
-        
-        // Send dynamic summary update
-        this.emitStageStatus('scanning', {
-          photosToDelete: photosToDelete,
-          videosToDelete: videosToDelete,
-          videosToMove: videosToMove,
-          foldersToDelete: foldersToDelete
-        });
       }
     }
     
@@ -796,16 +800,19 @@ class FileOperationsService {
       config.startFolder,
       (count, folderName) => {
         foldersToDelete = count; // Update dynamic counter
-        this.emitProgress(count, null, 'scanning folders');
         this.emitLog(`Found folder that would be empty ${count}: ${folderName}`);
         
-        // Send dynamic summary update
-        this.emitStageStatus('scanning', {
-          photosToDelete: photosToDelete,
-          videosToDelete: videosToDelete,
-          videosToMove: videosToMove,
-          foldersToDelete: foldersToDelete
-        });
+        // Send periodic updates with current counters (every 5 folders)
+        if (count % 5 === 0 || count === 1) {
+          this.emitStageStatus('scanning', {
+            ProcessedVideos: totalFiles, // Keep progress at 100% (file collection complete)
+            TotalVideos: totalFiles, // FIXED total, never changes
+            photosToDelete: photosToDelete,
+            videosToDelete: videosToDelete,
+            videosToMove: videosToMove,
+            foldersToDelete: foldersToDelete
+          });
+        }
       }
     );
     
@@ -817,6 +824,8 @@ class FileOperationsService {
     
     // Send final summary update with file lists
     this.emitStageStatus('scanning', {
+      ProcessedVideos: totalFiles, // File collection is complete
+      TotalVideos: totalFiles, // FIXED total, never changes
       photosToDelete: photosToDelete,
       videosToDelete: videosToDelete,
       videosToMove: videosToMove,
@@ -836,7 +845,7 @@ class FileOperationsService {
     // Only save scan results if not aborted
     if (!this.shouldAbort) {
       // Save scan results to file
-      const scanDir = path.join(__dirname, '..', '..', '.data', 'scan_results');
+      const scanDir = path.join(__dirname, '..', '.data', 'scan_results');
       await fs.mkdir(scanDir, { recursive: true });
       const scanPath = path.join(scanDir, `scan_results_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
       await this.saveScanResults(scanPath, photoFiles, shortVideos, longVideos, emptyFolders, config);
@@ -985,7 +994,13 @@ class FileOperationsService {
     
     const { photoFiles, shortVideos, longVideos, emptyFolders } = scanData;
     
+    // Track progress
+    let totalProcessed = 0;
+    const totalToProcess = photoFiles.length + shortVideos.length + longVideos.length + emptyFolders.length;
+    
     this.emitStageStatus('running', {
+      ProcessedVideos: 0,
+      TotalVideos: totalToProcess,
       photosToDelete: photoFiles.length,
       videosToDelete: shortVideos.length,
       foldersToDelete: emptyFolders.length,
@@ -1017,10 +1032,24 @@ class FileOperationsService {
       const photoOperationText = isDryRun ? 'Simulating photo deletion' : 'Moving photos to trash';
       this.emitLog(`${photoOperationText}...`);
       
-      for (const photo of photoFiles) {
+      for (let i = 0; i < photoFiles.length; i++) {
         if (this.shouldAbort) break;
+        const photo = photoFiles[i];
         
         await this.removeFileWithChoice(photo.path, 'photo', isDryRun);
+        
+        // Update progress
+        totalProcessed++;
+        if (i % 10 === 0 || i === photoFiles.length - 1) {
+          this.emitStageStatus('running', {
+            ProcessedVideos: totalProcessed,
+            TotalVideos: totalToProcess,
+            photosToDelete: photoFiles.length,
+            videosToDelete: shortVideos.length,
+            foldersToDelete: emptyFolders.length,
+            videosToMove: longVideos.length
+          }, isDryRun);
+        }
       }
     }
     
@@ -1033,6 +1062,17 @@ class FileOperationsService {
         if (this.shouldAbort) break;
         
         await this.removeFileWithChoice(video.path, 'short video', isDryRun);
+        
+        // Update progress
+        totalProcessed++;
+        this.emitStageStatus('running', {
+          ProcessedVideos: totalProcessed,
+          TotalVideos: totalToProcess,
+          photosToDelete: photoFiles.length,
+          videosToDelete: shortVideos.length,
+          foldersToDelete: emptyFolders.length,
+          videosToMove: longVideos.length
+        }, isDryRun);
       }
     }
     
@@ -1077,6 +1117,17 @@ class FileOperationsService {
             this.emitLog(`Failed to move video ${fileName}: ${error.message}`);
           }
         }
+        
+        // Update progress
+        totalProcessed++;
+        this.emitStageStatus('running', {
+          ProcessedVideos: totalProcessed,
+          TotalVideos: totalToProcess,
+          photosToDelete: photoFiles.length,
+          videosToDelete: shortVideos.length,
+          foldersToDelete: emptyFolders.length,
+          videosToMove: longVideos.length
+        }, isDryRun);
       }
     } else {
       this.emitLog('Video moving disabled or no videos to move');
@@ -1091,6 +1142,17 @@ class FileOperationsService {
         if (this.shouldAbort) break;
         
         await this.removeFileWithChoice(folder.path, 'empty folder', isDryRun);
+        
+        // Update progress
+        totalProcessed++;
+        this.emitStageStatus('running', {
+          ProcessedVideos: totalProcessed,
+          TotalVideos: totalToProcess,
+          photosToDelete: photoFiles.length,
+          videosToDelete: shortVideos.length,
+          foldersToDelete: emptyFolders.length,
+          videosToMove: longVideos.length
+        }, isDryRun);
       }
     } else {
       this.emitLog('Empty folder deletion disabled or no empty folders found');
@@ -1103,7 +1165,7 @@ class FileOperationsService {
     
     // Save operation log for revert functionality (only if not dry run)
     if (!isDryRun && this.operationLog.operations.length > 0) {
-      const logDir = path.join(__dirname, '..', '..', '.data', 'operation_logs');
+      const logDir = path.join(__dirname, '..', '.data', 'operation_logs');
       await fs.mkdir(logDir, { recursive: true });
       const logPath = path.join(logDir, `operation_log_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
       await this.saveOperationLog(logPath);

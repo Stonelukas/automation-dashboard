@@ -1,24 +1,49 @@
 {
   "name": "automation-dashboard",
   "version": "1.0.0",
-  "description": "File cleanup automation dashboard with real-time progress tracking",
+  "description": "File cleanup automation dashboard with real-time progress tracking using Shadcn UI",
+  "main": "backend/server.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "install:backend": "cd backend && npm install",
     "install:frontend": "cd frontend && npm install",
     "install:all": "npm run install:backend && npm run install:frontend",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start",
+    "start:frontend": "cd frontend && npm run start",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm start",
+    "dev:frontend": "cd frontend && npm run start",
     "build:frontend": "cd frontend && npm run build",
     "start:prod": "npm run build:frontend && npm run start:backend",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "clean": "cd frontend && rmdir /s /q build 2>nul || true && cd ../backend && rmdir /s /q node_modules 2>nul || true && cd ../frontend && rmdir /s /q node_modules 2>nul || true"
+    "test:frontend": "cd frontend && npm test",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:fix:frontend": "cd frontend && npm run lint:fix",
+    "clean": "cd frontend && rmdir /s /q build 2>nul || true && cd ../backend && rmdir /s /q node_modules 2>nul || true && cd ../frontend && rmdir /s /q node_modules 2>nul || true",
+    "postinstall": "echo 'Installation complete'"
   },
-  "keywords": ["automation", "file-cleanup", "dashboard", "react", "nodejs"],
+  "keywords": ["automation", "file-cleanup", "dashboard", "react", "nodejs", "shadcn-ui", "tailwindcss", "modern-ui"],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stonelukas/automation-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Stonelukas/automation-dashboard/issues"
+  },
+  "homepage": "https://github.com/Stonelukas/automation-dashboard#readme",
   "devDependencies": {
     "concurrently": "^7.6.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "volta": {
+    "node": "18.19.0",
+    "npm": "10.2.3"
   }
 }
