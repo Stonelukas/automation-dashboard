@@ -546,6 +546,7 @@ export default function App() {
       VideoExtensions: videoExtensions.split(",").map(ext => ext.trim()),
       DeleteEmptyFolders: deleteEmptyFolders,
       MoveVideos: moveVideos,
+      ExcludedFiles: excludedFiles,
     };
 
     socket.emit("startCleanup", cleanupParams);
@@ -565,7 +566,7 @@ export default function App() {
       longVideos: [],
       emptyFolders: []
     });
-  }, [socket, startFolder, videoMoveTarget, ignoreFolders, validationErrors, dryRun, minVideoLengthSec, photoExtensions, videoExtensions, deleteEmptyFolders, moveVideos]);
+  }, [socket, startFolder, videoMoveTarget, ignoreFolders, validationErrors, dryRun, minVideoLengthSec, photoExtensions, videoExtensions, deleteEmptyFolders, moveVideos, excludedFiles]);
 
   const sendConfirm = useCallback(() => {
     if (!socket) return;
