@@ -1,0 +1,124 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+
+const router = express.Router();
+
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// File serving endpoint for preview functionality
+router.get('/file', (req, res) => {
+  try {
+    const filePath = decodeURIComponent(req.query.path);
+    
+    if (!filePath) {
+      return res.status(400).json({ error: 'File path is required as query parameter' });
+    }
+    
+    // Security: Basic path validation to prevent directory traversal
+    if (filePath.includes('..') || filePath.includes('~')) {
+      return res.status(400).json({ error: 'Invalid file path' });
+    }
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    
+    // Check if it's actually a file (not a directory)
+    const stats = fs.statSync(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: 'Path is not a file' });
+    }
+    
+    // Get file extension to set appropriate content type
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.bmp': 'image/bmp',
+      '.mp4': 'video/mp4',
+      '.avi': 'video/x-msvideo',
+      '.mov': 'video/quicktime',
+      '.wmv': 'video/x-ms-wmv',
+      '.flv': 'video/x-flv',
+      '.mkv': 'video/x-matroska',
+      '.webm': 'video/webm'
+    };
+    
+    const mimeType = mimeTypes[ext] || 'application/octet-stream';
+    res.setHeader('Content-Type', mimeType);
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+    
+    fileStream.on('error', (error) => {
+      console.error('Error streaming file:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Error reading file' });
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error serving file:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// System file opening endpoint
+router.post('/open-file', (req, res) => {
+  try {
+    const { filePath } = req.body;
+    
+    if (!filePath) {
+      return res.status(400).json({ error: 'File path is required' });
+    }
+    
+    // Security: Basic path validation
+    if (filePath.includes('..') || filePath.includes('~')) {
+      return res.status(400).json({ error: 'Invalid file path' });
+    }
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    
+    // Use different commands based on OS
+    let command;
+    
+    if (process.platform === 'win32') {
+      command = `start "" "${filePath}"`; // Windows
+    } else if (process.platform === 'darwin') {
+      command = `open "${filePath}"`; // macOS
+    } else {
+      command = `xdg-open "${filePath}"`; // Linux
+    }
+    
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error opening file:', error);
+        return res.status(500).json({ error: 'Failed to open file' });
+      }
+      res.json({ success: true, message: 'File opened successfully' });
+    });
+    
+  } catch (error) {
+    console.error('Error in open-file endpoint:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+module.exports = router;

@@ -836,7 +836,7 @@ class FileOperationsService {
     // Only save scan results if not aborted
     if (!this.shouldAbort) {
       // Save scan results to file
-      const scanDir = path.join(__dirname, '..', '.data', 'scan_results');
+      const scanDir = path.join(__dirname, '..', '..', '.data', 'scan_results');
       await fs.mkdir(scanDir, { recursive: true });
       const scanPath = path.join(scanDir, `scan_results_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
       await this.saveScanResults(scanPath, photoFiles, shortVideos, longVideos, emptyFolders, config);
@@ -1103,7 +1103,7 @@ class FileOperationsService {
     
     // Save operation log for revert functionality (only if not dry run)
     if (!isDryRun && this.operationLog.operations.length > 0) {
-      const logDir = path.join(__dirname, '..', '.data', 'operation_logs');
+      const logDir = path.join(__dirname, '..', '..', '.data', 'operation_logs');
       await fs.mkdir(logDir, { recursive: true });
       const logPath = path.join(logDir, `operation_log_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
       await this.saveOperationLog(logPath);
