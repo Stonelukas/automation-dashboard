@@ -121,4 +121,64 @@ router.post('/open-file', (req, res) => {
   }
 });
 
+// Browse folders endpoint for folder browser functionality
+router.post('/browse-folders', (req, res) => {
+  try {
+    const { folderPath } = req.body;
+    
+    if (typeof folderPath !== 'string') {
+      return res.status(400).json({ 
+        success: false, 
+        data: { error: 'Folder path must be a string' }
+      });
+    }
+
+    // Import FileBrowserService
+    const FileBrowserService = require('../services/FileBrowserService');
+    const fileBrowserService = new FileBrowserService();
+    
+    // Call the browseFolders method
+    const result = fileBrowserService.browseFolders(folderPath);
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('Error in browse-folders endpoint:', error);
+    res.status(500).json({ 
+      success: false,
+      data: { error: 'Internal server error' }
+    });
+  }
+});
+
+// Create folder endpoint
+router.post('/create-folder', (req, res) => {
+  try {
+    const { folderPath, folderName } = req.body;
+    
+    if (typeof folderPath !== 'string' || typeof folderName !== 'string') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Folder path and name must be strings' 
+      });
+    }
+
+    // Import FileBrowserService
+    const FileBrowserService = require('../services/FileBrowserService');
+    const fileBrowserService = new FileBrowserService();
+    
+    // Call the createFolder method
+    const result = fileBrowserService.createFolder(folderPath, folderName);
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('Error in create-folder endpoint:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Internal server error' 
+    });
+  }
+});
+
 module.exports = router;

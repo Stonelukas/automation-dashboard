@@ -1,11 +1,88 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 class FileBrowserService {
+  // Get Windows drives and default folders
+  getWindowsDrivesAndDefaults() {
+    try {
+      const drives = [];
+      const defaultFolders = [];
+      
+      // Get Windows drives (A: through Z:)
+      for (let i = 65; i <= 90; i++) {
+        const driveLetter = String.fromCharCode(i);
+        const drivePath = `${driveLetter}:\\`;
+        
+        try {
+          // Check if drive exists by trying to access it
+          fs.accessSync(drivePath, fs.constants.F_OK);
+          drives.push({
+            name: `${driveLetter}: Drive`,
+            path: drivePath,
+            isDirectory: true,
+            icon: '💾'
+          });
+        } catch (err) {
+          // Drive doesn't exist, skip it
+        }
+      }
+      
+      // Get default user folders
+      const userProfile = os.homedir();
+      const defaultPaths = [
+        { name: 'Desktop', path: path.join(userProfile, 'Desktop'), icon: '🖥️' },
+        { name: 'Documents', path: path.join(userProfile, 'Documents'), icon: '📄' },
+        { name: 'Downloads', path: path.join(userProfile, 'Downloads'), icon: '📥' },
+        { name: 'Pictures', path: path.join(userProfile, 'Pictures'), icon: '🖼️' },
+        { name: 'Videos', path: path.join(userProfile, 'Videos'), icon: '🎬' },
+        { name: 'Music', path: path.join(userProfile, 'Music'), icon: '🎵' },
+        { name: 'OneDrive', path: path.join(userProfile, 'OneDrive'), icon: '☁️' },
+        { name: 'User Profile', path: userProfile, icon: '👤' }
+      ];
+      
+      // Check which default folders exist
+      defaultPaths.forEach(folder => {
+        try {
+          if (fs.existsSync(folder.path) && fs.statSync(folder.path).isDirectory()) {
+            defaultFolders.push({
+              name: folder.name,
+              path: folder.path,
+              isDirectory: true,
+              icon: folder.icon
+            });
+          }
+        } catch (err) {
+          // Folder doesn't exist or can't be accessed, skip it
+        }
+      });
+      
+      return { drives, defaultFolders };
+    } catch (error) {
+      console.error('Error getting Windows drives and defaults:', error);
+      return { drives: [], defaultFolders: [] };
+    }
+  }
+
   // Handle browse folders
   browseFolders(folderPath) {
     try {
-      const resolvedPath = path.resolve(folderPath || '.');
+      // If no path provided or empty, show drives and default folders
+      if (!folderPath || folderPath.trim() === '') {
+        const { drives, defaultFolders } = this.getWindowsDrivesAndDefaults();
+        
+        return {
+          success: true,
+          data: {
+            currentPath: '',
+            folders: [...drives, ...defaultFolders],
+            files: [],
+            isRootView: true
+          }
+        };
+      }
+      
+      const resolvedPath = path.resolve(folderPath);
       
       // Check if path exists and is a directory
       if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
@@ -33,7 +110,8 @@ class FileBrowserService {
           data: {
             currentPath: resolvedPath,
             folders: folders,
-            files: files
+            files: files,
+            isRootView: false
           }
         };
       } else {
@@ -62,22 +140,38 @@ class FileBrowserService {
   }
 
   // Handle create folder
-  createFolder(folderPath) {
+  createFolder(parentPath, folderName) {
     try {
-      const resolvedPath = path.resolve(folderPath);
+      const resolvedParentPath = path.resolve(parentPath);
+      const newFolderPath = path.join(resolvedParentPath, folderName);
       
-      // Create directory recursively
-      fs.mkdirSync(resolvedPath, { recursive: true });
+      // Check if parent directory exists
+      if (!fs.existsSync(resolvedParentPath)) {
+        return {
+          success: false,
+          error: 'Parent directory does not exist'
+        };
+      }
+      
+      // Check if folder already exists
+      if (fs.existsSync(newFolderPath)) {
+        return {
+          success: false,
+          error: 'Folder already exists'
+        };
+      }
+      
+      // Create directory
+      fs.mkdirSync(newFolderPath, { recursive: true });
       
       return {
         success: true,
-        path: resolvedPath
+        path: newFolderPath
       };
     } catch (error) {
       console.error('Error creating folder:', error);
       return {
         success: false,
-        path: folderPath,
         error: error.message
       };
     }

@@ -1,0 +1,5 @@
+packages:
+  - 'backend'
+  - 'frontend'
+  - 'nextjs-app'
+  - 'tauri-app'

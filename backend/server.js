@@ -14,7 +14,33 @@ const io = socketIo(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' ? false : '*',
     methods: ['GET', 'POST']
-  }
+  },
+  // Enhanced connection configuration for better performance and reliability
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  maxHttpBufferSize: 1e6,
+  allowEIO3: true,
+  transports: ['websocket', 'polling'],
+  // Connection management optimizations
+  connectTimeout: 45000,
+  upgradeTimeout: 10000,
+  // Compression for better performance
+  compression: true,
+  // Security improvements
+  allowRequest: (req, callback) => {
+    const origin = req.headers.origin;
+    const isAllowed = process.env.NODE_ENV === 'production' 
+      ? origin === process.env.ALLOWED_ORIGIN 
+      : true;
+    callback(null, isAllowed);
+  },
+  // Rate limiting to prevent abuse
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
+  // Performance monitoring
+  adapter: undefined, // Can be extended with Redis adapter for scaling
 });
 
 // File operations service

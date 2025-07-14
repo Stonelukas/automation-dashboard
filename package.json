@@ -5,23 +5,40 @@
   "main": "backend/server.js",
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "pnpm": ">=8.0.0"
   },
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
-    "install:backend": "cd backend && npm install",
-    "install:frontend": "cd frontend && npm install",
-    "install:all": "npm run install:backend && npm run install:frontend",
-    "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm run start",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run start",
-    "build:frontend": "cd frontend && npm run build",
-    "start:prod": "npm run build:frontend && npm run start:backend",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "test:frontend": "cd frontend && npm test",
-    "lint:frontend": "cd frontend && npm run lint",
-    "lint:fix:frontend": "cd frontend && npm run lint:fix",
-    "clean": "cd frontend && rmdir /s /q build 2>nul || true && cd ../backend && rmdir /s /q node_modules 2>nul || true && cd ../frontend && rmdir /s /q node_modules 2>nul || true",
+    "install:backend": "cd backend && pnpm install",
+    "install:frontend": "cd frontend && pnpm install", 
+    "install:nextjs": "cd nextjs-app && pnpm install",
+    "install:tauri": "cd tauri-app && pnpm install",
+    "install:all": "pnpm install -r",
+    "start:backend": "cd backend && pnpm start",
+    "start:frontend": "cd frontend && pnpm start",
+    "start:nextjs": "cd nextjs-app && pnpm dev",
+    "dev:backend": "cd backend && pnpm run dev",
+    "dev:frontend": "cd frontend && pnpm start",
+    "dev:nextjs": "cd nextjs-app && pnpm dev --turbopack",
+    "dev:tauri": "cd tauri-app && pnpm tauri dev",
+    "build:frontend": "cd frontend && pnpm run build",
+    "build:nextjs": "cd nextjs-app && pnpm build",
+    "build:tauri": "cd tauri-app && pnpm tauri build",
+    "start:prod": "pnpm run build:frontend && pnpm run start:backend",
+    "start:prod:nextjs": "pnpm run build:nextjs && pnpm run start:backend",
+    "dev:node": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:nextjs\"",
+    "dev:fast": "concurrently \"pnpm run dev:backend\" \"cd nextjs-app && pnpm dev --turbopack --no-lint\"",
+    "dev:analyze": "cd nextjs-app && pnpm build && pnpm analyze",
+    "test:frontend": "cd frontend && pnpm test",
+    "test:nextjs": "cd nextjs-app && pnpm test",
+    "lint:frontend": "cd frontend && pnpm run lint",
+    "lint:nextjs": "cd nextjs-app && pnpm run lint",
+    "lint:fix:frontend": "cd frontend && pnpm run lint:fix",
+    "lint:fix:nextjs": "cd nextjs-app && pnpm run lint:fix",
+    "type-check": "cd nextjs-app && pnpm tsc --noEmit",
+    "clean": "cd frontend && rmdir /s /q build 2>nul || true && cd ../backend && rmdir /s /q node_modules 2>nul || true && cd ../frontend && rmdir /s /q node_modules 2>nul || true && cd ../nextjs-app && rmdir /s /q .next node_modules 2>nul || true",
+    "clean:cache": "cd nextjs-app && rmdir /s /q .next 2>nul || true",
     "postinstall": "echo 'Installation complete'"
   },
   "keywords": ["automation", "file-cleanup", "dashboard", "react", "nodejs", "shadcn-ui", "tailwindcss", "modern-ui"],
@@ -40,10 +57,12 @@
   },
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "nextjs-app",
+    "tauri-app"
   ],
   "volta": {
     "node": "18.19.0",
-    "npm": "10.2.3"
+    "pnpm": "10.13.1"
   }
 }
