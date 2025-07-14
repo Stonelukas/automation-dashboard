@@ -1,0 +1,3 @@
+[submodule "tauri-app"]
+	path = tauri-app
+	url = https://github.com/Stonelukas/automation-dashbord-tauri-app
