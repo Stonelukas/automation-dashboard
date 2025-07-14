@@ -1,0 +1,440 @@
+<!DOCTYPE html><html><head>
+      <title>README</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///c:\Users\lukig\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.8.18\crossnote\dependencies\katex\katex.min.css">
+      
+      
+      <script type="text/javascript" src="file:///c:\Users\lukig\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.8.18\crossnote\dependencies\mermaid\mermaid.min.js" charset="UTF-8"></script>
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<div align="center">
+<p><img src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4NDEuOSA1OTUuMyI+PGcgZmlsbD0iIzYxREFGQiI+PHBhdGggZD0iTTY2Ni4zIDI5Ni41YzAtMzIuNS00MC43LTYzLjMtMTAzLjEtODIuNCAxNC40LTYzLjYgOC0xMTQuMi0yMC4yLTEzMC40LTYuNS0zLjgtMTQuMS01LjYtMjIuNC01LjZ2MjIuM2M0LjYgMCA4LjMuOSAxMS40IDIuNiAxMy42IDcuOCAxOS41IDM3LjUgMTQuOSA3NS43LTEuMSA5LjQtMi45IDE5LjMtNS4xIDI5LjQtMTkuNi00LjgtNDEtOC41LTYzLjUtMTAuOS0xMy41LTE4LjUtMjcuNS0zNS4zLTQxLjYtNTAgMzIuNi0zMC4zIDYzLjItNDYuOSA4NC00Ni45Vjc4Yy0yNy41IDAtNjMuNSAxOS42LTk5LjkgNTMuNi0zNi40LTMzLjgtNzIuNC01My4yLTk5LjktNTMuMnYyMi4zYzIwLjcgMCA1MS40IDE2LjUgODQgNDYuNi0xNCAxNC43LTI4IDMxLjQtNDEuMyA0OS45LTIyLjYgMi40LTQ0IDYuMS02My42IDExLTIuMy0xMC00LTE5LjctNS4yLTI5LTQuNy0zOC4yIDEuMS02Ny45IDE0LjYtNzUuOCAzLTEuOCA2LjktMi42IDExLjUtMi42Vjc4LjVjLTguNCAwLTE2IDEuOC0yMi42IDUuNi0yOC4xIDE2LjItMzQuNCA2Ni43LTE5LjkgMTMwLjEtNjIuMiAxOS4yLTEwMi43IDQ5LjktMTAyLjcgODIuMyAwIDMyLjUgNDAuNyA2My4zIDEwMy4xIDgyLjQtMTQuNCA2My42LTggMTE0LjIgMjAuMiAxMzAuNCA2LjUgMy44IDE0LjEgNS42IDIyLjUgNS42IDI3LjUgMCA2My41LTE5LjYgOTkuOS01My42IDM2LjQgMzMuOCA3Mi40IDUzLjIgOTkuOSA1My4yIDguNCAwIDE2LTEuOCAyMi42LTUuNiAyOC4xLTE2LjIgMzQuNC02Ni43IDE5LjktMTMwLjEgNjItMTkuMSAxMDIuNS00OS45IDEwMi41LTgyLjN6bS0xMzAuMi02Ni43Yy0zLjcgMTIuOS04LjMgMjYuMi0xMy41IDM5LjUtNC4xLTgtOC40LTE2LTEzLjEtMjQtNC42LTgtOS41LTE1LjgtMTQuNC0yMy40IDE0LjIgMi4xIDI3LjkgNC43IDQxIDcuOXptLTQ1LjggMTA2LjVjLTcuOCAxMy41LTE1LjggMjYuMy0yNC4xIDM4LjItMTQuOSAxLjMtMzAgMi00NS4yIDItMTUuMSAwLTMwLjItLjctNDUtMS45LTguMy0xMS45LTE2LjQtMjQuNi0yNC4yLTM4LTcuNi0xMy4xLTE0LjUtMjYuNC0yMC44LTM5LjggNi4yLTEzLjQgMTMuMi0yNi44IDIwLjctMzkuOSA3LjgtMTMuNSAxNS44LTI2LjMgMjQuMS0zOC4yIDE0LjktMS4zIDMwLTIgNDUuMi0yIDE1LjEgMCAzMC4yLjcgNDUgMS45IDguMyAxMS45IDE2LjQgMjQuNiAyNC4yIDM4IDcuNiAxMy4xIDE0LjUgMjYuNCAyMC44IDM5LjgtNi4zIDEzLjQtMTMuMiAyNi44LTIwLjcgMzkuOXptMzIuMy0xM2M1LjQgMTMuNCAxMCAyNi44IDEzLjggMzkuOC0xMy4xIDMuMi0yNi45IDUuOS00MS4yIDggNC45LTcuNyA5LjgtMTUuNiAxNC40LTIzLjcgNC42LTggOC45LTE2LjEgMTMtMjQuMXpNNDIxLjIgNDMwYy05LjMtOS42LTE4LjYtMjAuMy0yNy44LTMyIDkgLjQgMTguMi43IDI3LjUuNyA5LjQgMCAxOC43LS4yIDI3LjgtLjctOSAxMS43LTE4LjMgMjIuNC0yNy41IDMyem0tNzQuNC01OC45Yy0xNC4yLTIuMS0yNy45LTQuNy00MS03LjkgMy43LTEyLjkgOC4zLTI2LjIgMTMuNS0zOS41IDQuMSA4IDguNCAxNiAxMy4xIDI0IDQuNyA4IDkuNSAxNS44IDE0LjQgMjMuNHpNNDIwLjcgMTYzYzkuMyA5LjYgMTguNiAyMC4zIDI3LjggMzItOS0uNC0xOC4yLS43LTI3LjUtLjctOS40IDAtMTguNy4yLTI3LjguNyA5LTExLjcgMTguMy0yMi40IDI3LjUtMzJ6bS03NCA1OC45Yy00LjkgNy43LTkuOCAxNS42LTE0LjQgMjMuNy00LjYgOC04LjkgMTYtMTMgMjQtNS40LTEzLjQtMTAtMjYuOC0xMy44LTM5LjggMTMuMS0zLjEgMjYuOS01LjggNDEuMi03Ljl6bS05MC41IDEyNS4yYy0zNS40LTE1LjEtNTguMy0zNC45LTU4LjMtNTAuNiAwLTE1LjcgMjIuOS0zNS42IDU4LjMtNTAuNiA4LjYtMy43IDE4LTcgMjcuNy0xMC4xIDUuNyAxOS42IDEzLjIgNDAgMjIuNSA2MC45LTkuMiAyMC44LTE2LjYgNDEuMS0yMi4yIDYwLjYtOS45LTMuMS0xOS4zLTYuNS0yOC0xMC4yek0zMTAgNDkwYy0xMy42LTcuOC0xOS41LTM3LjUtMTQuOS03NS43IDEuMS05LjQgMi45LTE5LjMgNS4xLTI5LjQgMTkuNiA0LjggNDEgOC41IDYzLjUgMTAuOSAxMy41IDE4LjUgMjcuNSAzNS4zIDQxLjYgNTAtMzIuNiAzMC4zLTYzLjIgNDYuOS04NCA0Ni45LTQuNS0uMS04LjMtMS0xMS4zLTIuN3ptMjM3LjItNzYuMmM0LjcgMzguMi0xLjEgNjcuOS0xNC42IDc1LjgtMyAxLjgtNi45IDIuNi0xMS41IDIuNi0yMC43IDAtNTEuNC0xNi41LTg0LTQ2LjYgMTQtMTQuNyAyOC0zMS40IDQxLjMtNDkuOSAyMi42LTIuNCA0NC02LjEgNjMuNi0xMSAyLjMgMTAuMSA0LjEgMTkuOCA1LjIgMjkuMXptMzguNS02Ni43Yy04LjYgMy43LTE4IDctMjcuNyAxMC4xLTUuNy0xOS42LTEzLjItNDAtMjIuNS02MC45IDkuMi0yMC44IDE2LjYtNDEuMSAyMi4yLTYwLjYgOS45IDMuMSAxOS4zIDYuNSAyOC4xIDEwLjIgMzUuNCAxNS4xIDU4LjMgMzQuOSA1OC4zIDUwLjYtLjEgMTUuNy0yMyAzNS42LTU4LjQgNTAuNnpNMzIwLjggNzguNHoiLz48Y2lyY2xlIGN4PSI0MjAuOSIgY3k9IjI5Ni41IiByPSI0NS43Ii8+PHBhdGggZD0iTTUyMC41IDc4LjF6Ii8+PC9nPjwvc3ZnPg==" alt="File Cleanup Automation Dashboard"></p>
+<h1 id="file-cleanup-automation-dashboard">File Cleanup Automation Dashboard </h1>
+<p><em>A modern web-based dashboard for automating file cleanup tasks with real-time progress tracking</em></p>
+<p><a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E=18-3c873a?style=flat-square" alt="Node.js"></a><br>
+<a href="https://reactjs.org"><img src="https://img.shields.io/badge/React-19-61dafb?style=flat-square&amp;logo=react" alt="React"></a><br>
+<a href="https://docs.microsoft.com/powershell"><img src="https://img.shields.io/badge/PowerShell-7+-5391FE?style=flat-square&amp;logo=powershell" alt="PowerShell"></a><br>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-ISC-blue?style=flat-square" alt="License"></a></p>
+<p><a href="#features">Features</a> • <a href="#quick-start">Quick Start</a> • <a href="#architecture">Architecture</a> • <a href="#usage">Usage</a> • <a href="#api-reference">API Reference</a></p>
+</div>
+<h2 id="overview">Overview </h2>
+<p>The File Cleanup Automation Dashboard is a powerful, real-time file management system that intelligently categorizes and organizes media files. Built with a modern 3-tier architecture, it combines React's responsive UI, Node.js backend services, and PowerShell automation scripts to provide a seamless file cleanup experience.</p>
+<blockquote>
+<p>[!TIP]<br>
+This application supports dry-run mode for safe testing without modifying any files.</p>
+</blockquote>
+<h2 id="features">Features </h2>
+<p><strong>🎯 Smart File Analysis</strong></p>
+<ul>
+<li>Automatic video duration detection using FFmpeg</li>
+<li>Intelligent categorization of photos, short videos, and long videos</li>
+<li>Real-time file scanning with progress tracking</li>
+</ul>
+<p><strong>📱 Interactive File Management</strong></p>
+<ul>
+<li>In-browser image preview with full-screen viewing</li>
+<li>Native video playback controls</li>
+<li>Advanced sorting by name, size, or duration</li>
+<li>Individual file exclusion from cleanup operations</li>
+</ul>
+<p><strong>⚡ Real-time Communication</strong></p>
+<ul>
+<li>Live progress updates via WebSocket connections</li>
+<li>Instant status notifications and error reporting</li>
+<li>Background process monitoring</li>
+</ul>
+<p><strong>🔧 System Integration</strong></p>
+<ul>
+<li>Cross-platform file opening with default applications</li>
+<li>Persistent user settings and preferences</li>
+<li>Configurable folder targets and ignore lists</li>
+</ul>
+<p><strong>🛡️ Safety &amp; Validation</strong></p>
+<ul>
+<li>Comprehensive input validation and sanitization</li>
+<li>User confirmation before any file modifications</li>
+<li>Dry-run mode for safe testing</li>
+<li>Error boundaries and graceful error handling</li>
+</ul>
+<h2 id="quick-start">Quick Start </h2>
+<h3 id="prerequisites">Prerequisites </h3>
+<p>Before you begin, ensure you have the following installed:</p>
+<ul>
+<li><a href="https://nodejs.org">Node.js</a> (v18 or higher)</li>
+<li><a href="https://docs.microsoft.com/powershell">PowerShell</a> (v7+ recommended)</li>
+<li><a href="https://ffmpeg.org/download.html">FFmpeg</a> (for video analysis)</li>
+</ul>
+<h3 id="installation">Installation </h3>
+<ol>
+<li>
+<p><strong>Clone the repository</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">git</span> clone https://github.com/Stonelukas/automation-dashboard.git
+<span class="token builtin class-name">cd</span> automation-dashboard
+</code></pre></li>
+<li>
+<p><strong>Install dependencies</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">npm</span> run install:all
+</code></pre></li>
+<li>
+<p><strong>Start development environment</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">npm</span> run dev
+</code></pre></li>
+<li>
+<p><strong>Open your browser</strong></p>
+<ul>
+<li>Navigate to <code>http://localhost:3000</code></li>
+<li>Backend API runs on <code>http://localhost:8080</code></li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>[!NOTE]<br>
+FFmpeg must be available in your system PATH for video duration analysis to work properly.</p>
+</blockquote>
+<h2 id="architecture">Architecture </h2>
+<p>This application follows a modern 3-tier architecture designed for real-time file processing:</p>
+<h3 id="system-components">System Components </h3>
+<div class="mermaid">flowchart TB
+    UI[React Frontend&lt;br/&gt;Port 3000] 
+    API[Node.js Backend&lt;br/&gt;Port 8080]
+    PS[PowerShell Script&lt;br/&gt;cleanup.ps1]
+    
+    UI &lt;--&gt;|Socket.IO&lt;br/&gt;Real-time Events| API
+    UI &lt;--&gt;|REST API&lt;br/&gt;File Operations| API
+    API &lt;--&gt;|JSON Communication&lt;br/&gt;Process Spawn| PS
+    
+    API --&gt; Files[File System]
+    PS --&gt; Files
+</div><p><strong>Frontend Layer (React)</strong></p>
+<ul>
+<li>Interactive dashboard with responsive design</li>
+<li><a href="http://Socket.IO">Socket.IO</a> client for real-time updates</li>
+<li>Advanced file preview and management</li>
+<li>Modern UI components with Tailwind CSS</li>
+</ul>
+<p><strong>Backend Layer (Node.js + Express)</strong></p>
+<ul>
+<li>RESTful API endpoints for file operations</li>
+<li><a href="http://Socket.IO">Socket.IO</a> server for real-time communication</li>
+<li>File serving with proper MIME type handling</li>
+<li>Cross-platform system integration</li>
+</ul>
+<p><strong>Automation Layer (PowerShell)</strong></p>
+<ul>
+<li>File scanning and analysis with FFmpeg</li>
+<li>JSON-based communication protocol</li>
+<li>Dry-run mode for safe testing</li>
+<li>Comprehensive error handling and logging</li>
+</ul>
+<h2 id="usage">Usage </h2>
+<h3 id="how-it-works">How It Works </h3>
+<p>The cleanup process follows these intelligent steps:</p>
+<ol>
+<li>
+<p><strong>📁 Directory Scanning</strong></p>
+<ul>
+<li>Scans specified directories with real-time progress</li>
+<li>Identifies media files (photos, videos) and empty folders</li>
+<li>Provides instant feedback on discovered files</li>
+</ul>
+</li>
+<li>
+<p><strong>🎬 Video Analysis</strong></p>
+<ul>
+<li>Uses FFmpeg to determine video durations</li>
+<li>Automatically categorizes based on configurable thresholds</li>
+<li>Supports multiple video formats (MP4, AVI, MOV, etc.)</li>
+</ul>
+</li>
+<li>
+<p><strong>📋 File Categorization</strong></p>
+<ul>
+<li><strong>Photos</strong> (JPG, PNG, GIF, etc.) → Marked for deletion</li>
+<li><strong>Short Videos</strong> (&lt; 9 seconds) → Marked for deletion</li>
+<li><strong>Long Videos</strong> (≥ 9 seconds) → Marked for moving</li>
+<li><strong>Empty Folders</strong> → Marked for deletion</li>
+</ul>
+</li>
+<li>
+<p><strong>🔍 Interactive Review</strong></p>
+<ul>
+<li>Preview images with full-screen viewing</li>
+<li>Play videos with native browser controls</li>
+<li>Sort files by name, size, or duration</li>
+<li>Exclude specific files from cleanup operations</li>
+</ul>
+</li>
+<li>
+<p><strong>✅ User Confirmation</strong></p>
+<ul>
+<li>Review detailed summary before execution</li>
+<li>Confirm or cancel operations</li>
+<li>Apply changes only to non-excluded files</li>
+</ul>
+</li>
+</ol>
+<h3 id="development-workflow">Development Workflow </h3>
+<p><strong>Development Mode</strong> (Hot Reload)</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">npm</span> run dev
+</code></pre><p><strong>Production Build</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">npm</span> run start:prod
+</code></pre><p><strong>Using PowerShell Scripts</strong></p>
+<pre data-role="codeBlock" data-info="powershell" class="language-powershell powershell"><code><span class="token comment"># Development</span>
+<span class="token punctuation">.</span>\<span class="token function">start-dev</span><span class="token punctuation">.</span>ps1
+
+<span class="token comment"># Production  </span>
+<span class="token punctuation">.</span>\<span class="token function">start-prod</span><span class="token punctuation">.</span>ps1
+</code></pre><h3 id="configuration">Configuration </h3>
+<p><strong>Application Settings</strong> (via web interface):</p>
+<ul>
+<li><strong>Start Folder</strong>: Root directory to scan</li>
+<li><strong>Video Move Target</strong>: Destination for long videos</li>
+<li><strong>Ignore Folders</strong>: Comma-separated list of folders to skip</li>
+<li><strong>Dry Run Mode</strong>: Enable safe testing without file modifications</li>
+</ul>
+<p><strong>Environment Variables</strong>:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Backend (.env)</span>
+<span class="token assign-left variable">PORT</span><span class="token operator">=</span><span class="token number">8080</span>
+<span class="token assign-left variable">NODE_ENV</span><span class="token operator">=</span>development
+
+<span class="token comment"># Frontend (.env)  </span>
+<span class="token assign-left variable">REACT_APP_SOCKET_URL</span><span class="token operator">=</span>http://localhost:8080
+</code></pre><h2 id="project-structure">Project Structure </h2>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>automation-dashboard/
+├── 📁 backend/                 # Node.js Express server
+│   ├── server.js              # Main server with Socket.IO and REST API
+│   ├── fileOperations.js      # File scanning and analysis service
+│   ├── handlers/              # Socket.IO event handlers
+│   ├── routes/                # API route definitions  
+│   └── services/              # Business logic services
+├── 📁 frontend/               # React SPA application
+│   ├── src/
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── FileListModal.js    # Advanced file management modal
+│   │   │   ├── StatusBadge.js      # Real-time status indicators
+│   │   │   ├── ProgressBar.js      # Progress visualization
+│   │   │   └── ErrorBoundary.js    # Error handling wrapper
+│   │   ├── hooks/             # Custom React hooks
+│   │   │   └── useUtilities.js     # Debouncing and localStorage
+│   │   ├── utils/             # Utility functions
+│   │   │   ├── validation.js       # Input validation and sanitization
+│   │   │   └── businessLogic.js    # Application logic
+│   │   └── App.js             # Main application component
+│   └── build/                 # Production build output
+├── 📁 Scripts/                # PowerShell automation
+│   ├── cleanup.ps1           # Main cleanup script with JSON communication
+│   ├── start-dev.ps1         # Development environment starter
+│   └── start-prod.ps1        # Production environment starter
+├── 📁 test_files/            # Sample files for testing
+├── 📁 Doc/                   # Project documentation
+└── package.json              # Workspace configuration
+</code></pre><h2 id="api-reference">API Reference </h2>
+<h3 id="rest-endpoints">REST Endpoints </h3>
+<p><strong>File Operations</strong></p>
+<pre data-role="codeBlock" data-info="http" class="language-http http"><code>GET /api/file?file={path}&amp;t={timestamp}
+</code></pre><p>Serves files with proper MIME types and cache-busting support.</p>
+<pre data-role="codeBlock" data-info="http" class="language-http http"><code>POST /api/open-file
+<span class="token header"><span class="token header-name keyword">Content-Type</span><span class="token punctuation">:</span> <span class="token header-value">application/json</span></span>
+<span class="token application-json">
+<span class="token punctuation">{</span>
+  <span class="token string-property property">"filePath"</span><span class="token operator">:</span> <span class="token string">"/path/to/file"</span>
+<span class="token punctuation">}</span>
+</span></code></pre><p>Opens files with system default applications (cross-platform).</p>
+<h3 id="socketio-events"><a href="http://Socket.IO">Socket.IO</a> Events </h3>
+<p><strong>Client → Server Events</strong></p>
+<ul>
+<li><code>startCleanup</code> - Begin cleanup process with configuration parameters</li>
+<li><code>confirm</code> - Confirm cleanup execution after review</li>
+<li><code>cancel</code> - Cancel current cleanup operation</li>
+</ul>
+<p><strong>Server → Client Events</strong></p>
+<ul>
+<li><code>status</code> - Real-time status updates and progress information</li>
+<li><code>error</code> - Error messages and troubleshooting information</li>
+</ul>
+<p><strong>Event Schema Example</strong></p>
+<pre data-role="codeBlock" data-info="javascript" class="language-javascript javascript"><code><span class="token comment">// Status event payload</span>
+<span class="token punctuation">{</span>
+  <span class="token literal-property property">stage</span><span class="token operator">:</span> <span class="token string">'scanning|waiting|running|done|aborted'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">progress</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">TotalVideos</span><span class="token operator">:</span> <span class="token number">150</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">ProcessedVideos</span><span class="token operator">:</span> <span class="token number">75</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">PhotosToDelete</span><span class="token operator">:</span> <span class="token number">45</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">ShortVideosToDelete</span><span class="token operator">:</span> <span class="token number">12</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">LongVideosToMove</span><span class="token operator">:</span> <span class="token number">8</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">EmptyFoldersToDelete</span><span class="token operator">:</span> <span class="token number">3</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">logs</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Scanning folder: /path/to/folder"</span><span class="token punctuation">,</span> <span class="token string">"Found 25 photos..."</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">isDryRun</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span>
+</code></pre><h2 id="troubleshooting">Troubleshooting </h2>
+<h3 id="common-issues">Common Issues </h3>
+<p><strong>🔌 Connection Problems</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Check if backend is running</span>
+<span class="token function">curl</span> http://localhost:8080/health
+
+<span class="token comment"># Verify Socket.IO connection</span>
+<span class="token comment"># Look for "Connected to server" in browser console</span>
+</code></pre><p><strong>⚡ PowerShell Execution Issues</strong></p>
+<pre data-role="codeBlock" data-info="powershell" class="language-powershell powershell"><code><span class="token comment"># Check execution policy</span>
+<span class="token function">Get-ExecutionPolicy</span>
+
+<span class="token comment"># Set execution policy if needed</span>
+<span class="token function">Set-ExecutionPolicy</span> <span class="token operator">-</span>ExecutionPolicy RemoteSigned <span class="token operator">-</span>Scope CurrentUser
+</code></pre><p><strong>🎬 FFmpeg Not Found</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Verify FFmpeg installation</span>
+ffmpeg <span class="token parameter variable">-version</span>
+
+<span class="token comment"># Windows: Add to PATH or install via Chocolatey</span>
+choco <span class="token function">install</span> ffmpeg
+
+<span class="token comment"># macOS: Install via Homebrew  </span>
+brew <span class="token function">install</span> ffmpeg
+
+<span class="token comment"># Linux: Install via package manager</span>
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> ffmpeg
+</code></pre><p><strong>📁 Path Validation Errors</strong></p>
+<ul>
+<li>Use absolute paths only</li>
+<li>Avoid special characters in folder names</li>
+<li>Ensure target directories exist and are writable</li>
+<li>Check folder permissions</li>
+</ul>
+<h3 id="debug-mode">Debug Mode </h3>
+<p>Enable detailed logging for troubleshooting:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Backend debug logging</span>
+<span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>socket.io:* <span class="token function">npm</span> run dev
+
+<span class="token comment"># PowerShell script verbose output</span>
+.<span class="token punctuation">\</span>cleanup.ps1 <span class="token parameter variable">-Verbose</span> <span class="token parameter variable">-DryRun</span>
+</code></pre><blockquote>
+<p>[!WARNING]<br>
+Always test with dry-run mode enabled before making actual file changes.</p>
+</blockquote>
+<h2 id="performance--security">Performance &amp; Security </h2>
+<p><strong>🚀 Performance Optimizations</strong></p>
+<ul>
+<li>Debounced input validation prevents excessive API calls</li>
+<li>Persistent settings using localStorage for faster startup</li>
+<li>Efficient <a href="http://Socket.IO">Socket.IO</a> event batching prevents UI flooding</li>
+<li>Streaming file operations for large directories</li>
+</ul>
+<p><strong>🛡️ Security Measures</strong></p>
+<ul>
+<li>Path validation prevents directory traversal attacks</li>
+<li>Input sanitization removes potentially dangerous characters</li>
+<li>CORS configuration restricts cross-origin requests in production</li>
+<li>Error boundaries prevent information leakage in error messages</li>
+</ul>
+<h2 id="examples">Examples </h2>
+<p><strong>Basic Cleanup Operation</strong></p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token comment"># Start the application</span>
+<span class="token function">npm</span> run dev
+
+<span class="token comment"># Configure in web interface:</span>
+<span class="token comment"># - Start Folder: C:\Users\Username\Downloads</span>
+<span class="token comment"># - Video Move Target: C:\Users\Username\Videos</span>
+<span class="token comment"># - Enable Dry Run for testing</span>
+
+<span class="token comment"># The system will:</span>
+<span class="token comment"># 1. Scan Downloads folder</span>
+<span class="token comment"># 2. Categorize files by type and duration  </span>
+<span class="token comment"># 3. Show preview with file counts</span>
+<span class="token comment"># 4. Allow individual file exclusions</span>
+<span class="token comment"># 5. Wait for user confirmation</span>
+<span class="token comment"># 6. Execute cleanup operations</span>
+</code></pre><p><strong>PowerShell Script Direct Usage</strong></p>
+<pre data-role="codeBlock" data-info="powershell" class="language-powershell powershell"><code><span class="token comment"># Test mode (no actual changes)</span>
+<span class="token punctuation">.</span>\Scripts\cleanup<span class="token punctuation">.</span>ps1 <span class="token operator">-</span>StartFolder <span class="token string">"C:\Downloads"</span> <span class="token operator">-</span>VideoMoveTarget <span class="token string">"C:\Videos"</span> <span class="token operator">-</span>DryRun
+
+<span class="token comment"># Production mode  </span>
+<span class="token punctuation">.</span>\Scripts\cleanup<span class="token punctuation">.</span>ps1 <span class="token operator">-</span>StartFolder <span class="token string">"C:\Downloads"</span> <span class="token operator">-</span>VideoMoveTarget <span class="token string">"C:\Videos"</span>
+</code></pre><h2 id="resources">Resources </h2>
+<p><strong>Documentation &amp; Guides</strong></p>
+<ul>
+<li><a href="https://nodejs.org/docs">Node.js Documentation</a> - Server runtime and APIs</li>
+<li><a href="https://react.dev">React Documentation</a> - Frontend framework and hooks</li>
+<li><a href="https://socket.io/docs">Socket.IO Documentation</a> - Real-time communication</li>
+<li><a href="https://docs.microsoft.com/powershell">PowerShell Documentation</a> - Automation scripting</li>
+<li><a href="https://ffmpeg.org/documentation.html">FFmpeg Documentation</a> - Video processing</li>
+</ul>
+<p><strong>Related Projects</strong></p>
+<ul>
+<li><a href="https://github.com/example/file-organizer">File Organizer</a> - Similar automation tools</li>
+<li><a href="https://github.com/example/media-sorter">Media Sorter</a> - Media file management</li>
+<li><a href="https://github.com/example/cleanup-utils">Cleanup Utilities</a> - File cleanup scripts</li>
+</ul>
+<p><strong>Community &amp; Support</strong></p>
+<ul>
+<li><a href="https://github.com/Stonelukas/automation-dashboard/issues">GitHub Issues</a> - Bug reports and feature requests</li>
+<li><a href="https://github.com/Stonelukas/automation-dashboard/discussions">GitHub Discussions</a> - Community support and ideas</li>
+</ul>
+<blockquote>
+<p>[!TIP]<br>
+Star this project on GitHub if you find it useful! It helps others discover the project.</p>
+</blockquote>
+
+      </div>
+      
+      
+    
+    
+    <script type="module">
+// TODO: If ZenUML gets integrated into mermaid in the future,
+//      we can remove the following lines.
+
+
+var MERMAID_CONFIG = ({"startOnLoad":false});
+if (typeof MERMAID_CONFIG !== 'undefined') {
+  MERMAID_CONFIG.startOnLoad = false
+  MERMAID_CONFIG.cloneCssStyles = false
+  MERMAID_CONFIG.theme = "default"
+}
+
+mermaid.initialize(MERMAID_CONFIG || {})
+if (typeof(window['Reveal']) !== 'undefined') {
+  function mermaidRevealHelper(event) {
+    var currentSlide = event.currentSlide
+    var diagrams = currentSlide.querySelectorAll('.mermaid')
+    for (var i = 0; i < diagrams.length; i++) {
+      var diagram = diagrams[i]
+      if (!diagram.hasAttribute('data-processed')) {
+        mermaid.init(null, diagram, ()=> {
+          Reveal.slide(event.indexh, event.indexv)
+        })
+      }
+    }
+  }
+  Reveal.addEventListener('slidetransitionend', mermaidRevealHelper)
+  Reveal.addEventListener('ready', mermaidRevealHelper)
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+} else {
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+}
+</script>
+    
+    
+    
+  
+    </body></html>
