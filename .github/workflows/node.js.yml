@@ -11,21 +11,48 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: ['22.x', '24.x']
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: ['18.x', '20.x']
+        # Using Node.js versions that match project requirements (>=18.0.0)
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        # cache: 'npm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.13.1
+    
+    - name: Cache pnpm modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.pnpm-store
+        key: ${{ runner.os }}-pnpm-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-${{ matrix.node-version }}-
+          ${{ runner.os }}-pnpm-
+    
     - name: Install dependencies
-      run: npm run install:all
-    - run: npm run build:frontend
+      run: pnpm run install:all
+    
+    - name: Build Next.js app
+      run: pnpm run build:nextjs
+    
+    - name: Lint Next.js app
+      run: pnpm run lint:nextjs
+    
+    - name: Type check
+      run: pnpm run type-check
+    
+    - name: Test Next.js app
+      run: pnpm run test:nextjs
+      env:
+        NODE_ENV: test
