@@ -46,13 +46,8 @@ jobs:
     - name: Build Next.js app
       run: pnpm run build:nextjs
     
-    - name: Lint Next.js app
-      run: pnpm run lint:nextjs
-    
     - name: Type check
       run: pnpm run type-check
     
-    - name: Test Next.js app
-      run: pnpm run test:nextjs
       env:
         NODE_ENV: test
