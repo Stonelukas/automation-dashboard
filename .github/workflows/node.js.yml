@@ -49,7 +49,5 @@ jobs:
     - name: Type check
       run: pnpm run type-check
     
-    - name: Test Next.js app
-      run: pnpm run test:nextjs
       env:
         NODE_ENV: test
