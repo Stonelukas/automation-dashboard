@@ -31,7 +31,6 @@
     "dev:fast": "concurrently \"pnpm run dev:backend\" \"cd nextjs-app && pnpm dev --turbopack --no-lint\"",
     "dev:analyze": "cd nextjs-app && pnpm build && pnpm analyze",
     "test:frontend": "cd frontend && pnpm test",
-    "test:nextjs": "cd nextjs-app && pnpm test",
     "lint:frontend": "cd frontend && pnpm run lint",
     "lint:nextjs": "cd nextjs-app && pnpm run lint",
     "lint:fix:frontend": "cd frontend && pnpm run lint:fix",
