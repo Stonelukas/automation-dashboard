@@ -43,11 +43,24 @@ const io = socketIo(server, {
   adapter: undefined, // Can be extended with Redis adapter for scaling
 });
 
-// File operations service
+// File operations service - shared singleton instance for all connections
+// This prevents memory leaks and ensures operations are properly serialized
 let fileOpsService = null;
 
-// Socket handlers
+// Socket handlers - shared singleton instance
 let socketHandlers = null;
+
+// Initialize services once at startup
+const initializeServices = () => {
+  if (!fileOpsService) {
+    fileOpsService = new FileOperationsService(io);
+    console.log('FileOperationsService initialized');
+  }
+  if (!socketHandlers) {
+    socketHandlers = new SocketHandlers(io, fileOpsService);
+    console.log('SocketHandlers initialized');
+  }
+};
 
 // Middleware
 app.use(express.json());
@@ -73,13 +86,11 @@ console.log('Environment:', process.env.NODE_ENV || 'development');
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-  // Initialize file operations service for this socket
-  fileOpsService = new FileOperationsService(io);
+  // Initialize services if not already initialized (singleton pattern)
+  initializeServices();
   
-  // Initialize socket handlers
-  socketHandlers = new SocketHandlers(io, fileOpsService);
-  
-  // Setup all socket event handlers
+  // Setup all socket event handlers for this connection
+  // Services are shared across all connections to prevent memory leaks
   socketHandlers.setupConnectionHandlers(socket);
 });
 

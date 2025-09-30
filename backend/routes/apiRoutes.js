@@ -23,24 +23,37 @@ router.get('/file', (req, res) => {
       return res.status(400).json({ error: 'File path is required as query parameter' });
     }
     
-    // Security: Basic path validation to prevent directory traversal
-    if (filePath.includes('..') || filePath.includes('~')) {
-      return res.status(400).json({ error: 'Invalid file path' });
+    // Security: Enhanced path validation to prevent directory traversal
+    // Resolve to absolute path and check for path traversal attempts
+    const resolvedPath = path.resolve(filePath);
+    const normalizedPath = path.normalize(filePath);
+    
+    // Check for directory traversal patterns (including URL-encoded variants)
+    if (normalizedPath.includes('..') || filePath.includes('~') || 
+        filePath.includes('%2e%2e') || filePath.includes('%2E%2E')) {
+      return res.status(400).json({ error: 'Invalid file path - directory traversal not allowed' });
+    }
+    
+    // Additional security: Ensure resolved path doesn't escape intended boundaries
+    // Only allow access to files, not system directories
+    const systemPaths = ['/etc', '/sys', '/proc', 'C:\\Windows', 'C:\\Program Files'];
+    if (systemPaths.some(sysPath => resolvedPath.startsWith(sysPath))) {
+      return res.status(403).json({ error: 'Access to system directories is forbidden' });
     }
     
     // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ error: 'File not found' });
     }
     
     // Check if it's actually a file (not a directory)
-    const stats = fs.statSync(filePath);
+    const stats = fs.statSync(resolvedPath);
     if (!stats.isFile()) {
       return res.status(400).json({ error: 'Path is not a file' });
     }
     
     // Get file extension to set appropriate content type
-    const ext = path.extname(filePath).toLowerCase();
+    const ext = path.extname(resolvedPath).toLowerCase();
     const mimeTypes = {
       '.jpg': 'image/jpeg',
       '.jpeg': 'image/jpeg',
@@ -61,7 +74,7 @@ router.get('/file', (req, res) => {
     res.setHeader('Content-Type', mimeType);
     
     // Stream the file
-    const fileStream = fs.createReadStream(filePath);
+    const fileStream = fs.createReadStream(resolvedPath);
     fileStream.pipe(res);
     
     fileStream.on('error', (error) => {
@@ -86,13 +99,24 @@ router.post('/open-file', (req, res) => {
       return res.status(400).json({ error: 'File path is required' });
     }
     
-    // Security: Basic path validation
-    if (filePath.includes('..') || filePath.includes('~')) {
-      return res.status(400).json({ error: 'Invalid file path' });
+    // Security: Enhanced path validation to prevent directory traversal
+    const resolvedPath = path.resolve(filePath);
+    const normalizedPath = path.normalize(filePath);
+    
+    // Check for directory traversal patterns (including URL-encoded variants)
+    if (normalizedPath.includes('..') || filePath.includes('~') || 
+        filePath.includes('%2e%2e') || filePath.includes('%2E%2E')) {
+      return res.status(400).json({ error: 'Invalid file path - directory traversal not allowed' });
+    }
+    
+    // Additional security: Ensure resolved path doesn't escape intended boundaries
+    const systemPaths = ['/etc', '/sys', '/proc', 'C:\\Windows', 'C:\\Program Files'];
+    if (systemPaths.some(sysPath => resolvedPath.startsWith(sysPath))) {
+      return res.status(403).json({ error: 'Access to system directories is forbidden' });
     }
     
     // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ error: 'File not found' });
     }
     
@@ -100,11 +124,11 @@ router.post('/open-file', (req, res) => {
     let command;
     
     if (process.platform === 'win32') {
-      command = `start "" "${filePath}"`; // Windows
+      command = `start "" "${resolvedPath}"`; // Windows
     } else if (process.platform === 'darwin') {
-      command = `open "${filePath}"`; // macOS
+      command = `open "${resolvedPath}"`; // macOS
     } else {
-      command = `xdg-open "${filePath}"`; // Linux
+      command = `xdg-open "${resolvedPath}"`; // Linux
     }
     
     exec(command, (error, stdout, stderr) => {
