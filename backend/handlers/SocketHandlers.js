@@ -333,7 +333,21 @@ class SocketHandlers {
     socket.on('createFolder', (data) => {
       console.log('Create folder requested:', data);
       
-      const result = this.fileBrowserService.createFolder(data.path);
+      // Support both new and legacy parameter shapes
+      const parentPath = typeof data.parentPath === 'string' ? data.parentPath
+        : (typeof data.path === 'string' ? data.path : null);
+      const folderName = typeof data.folderName === 'string' ? data.folderName
+        : (typeof data.name === 'string' ? data.name : null);
+
+      if (!parentPath || !folderName) {
+        socket.emit('folderCreated', {
+          success: false,
+          error: 'Both parentPath and folderName are required'
+        });
+        return;
+      }
+
+      const result = this.fileBrowserService.createFolder(parentPath, folderName);
       socket.emit('folderCreated', result);
     });
   }
