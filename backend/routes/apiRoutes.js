@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const router = express.Router();
 
@@ -17,7 +17,8 @@ router.get('/health', (req, res) => {
 // File serving endpoint for preview functionality
 router.get('/file', (req, res) => {
   try {
-    const filePath = decodeURIComponent(req.query.path);
+    const requested = req.query.path || req.query.file;
+    const filePath = requested ? decodeURIComponent(requested) : '';
     
     if (!filePath) {
       return res.status(400).json({ error: 'File path is required as query parameter' });
@@ -96,24 +97,23 @@ router.post('/open-file', (req, res) => {
       return res.status(404).json({ error: 'File not found' });
     }
     
-    // Use different commands based on OS
-    let command;
-    
-    if (process.platform === 'win32') {
-      command = `start "" "${filePath}"`; // Windows
-    } else if (process.platform === 'darwin') {
-      command = `open "${filePath}"`; // macOS
+    // Open the file using platform-specific opener with arguments, not shell
+    const platform = process.platform;
+    let child;
+    if (platform === 'win32') {
+      // Use cmd.exe built-in start requires shell, instead leverage powershell Start-Process safely
+      child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', 'Start-Process', '-FilePath', filePath], { stdio: 'ignore' });
+    } else if (platform === 'darwin') {
+      child = spawn('open', [filePath], { stdio: 'ignore' });
     } else {
-      command = `xdg-open "${filePath}"`; // Linux
+      child = spawn('xdg-open', [filePath], { stdio: 'ignore' });
     }
-    
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Error opening file:', error);
-        return res.status(500).json({ error: 'Failed to open file' });
-      }
-      res.json({ success: true, message: 'File opened successfully' });
+    child.on('error', (error) => {
+      console.error('Error opening file:', error);
+      return res.status(500).json({ error: 'Failed to open file' });
     });
+    // Consider success once spawned
+    res.json({ success: true, message: 'Open command dispatched' });
     
   } catch (error) {
     console.error('Error in open-file endpoint:', error);
