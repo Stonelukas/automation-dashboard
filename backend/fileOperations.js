@@ -1028,15 +1028,24 @@ class FileOperationsService {
     }
     
     // Delete photos
-    if (photoFiles.length > 0) {
+    if (photoFiles.length > 0 && !this.shouldAbort) {
       const photoOperationText = isDryRun ? 'Simulating photo deletion' : 'Moving photos to trash';
       this.emitLog(`${photoOperationText}...`);
       
       for (let i = 0; i < photoFiles.length; i++) {
-        if (this.shouldAbort) break;
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected during photo deletion - stopping operation');
+          break;
+        }
         const photo = photoFiles[i];
         
         await this.removeFileWithChoice(photo.path, 'photo', isDryRun);
+        
+        // Check abort flag again after async operation
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected after photo deletion - stopping operation');
+          break;
+        }
         
         // Update progress
         totalProcessed++;
@@ -1054,14 +1063,23 @@ class FileOperationsService {
     }
     
     // Delete short videos
-    if (shortVideos.length > 0) {
+    if (shortVideos.length > 0 && !this.shouldAbort) {
       const shortVideoOperationText = isDryRun ? 'Simulating short video deletion' : 'Moving short videos to trash';
       this.emitLog(`${shortVideoOperationText}...`);
       
       for (const video of shortVideos) {
-        if (this.shouldAbort) break;
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected during short video deletion - stopping operation');
+          break;
+        }
         
         await this.removeFileWithChoice(video.path, 'short video', isDryRun);
+        
+        // Check abort flag again after async operation
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected after short video deletion - stopping operation');
+          break;
+        }
         
         // Update progress
         totalProcessed++;
@@ -1077,12 +1095,15 @@ class FileOperationsService {
     }
     
     // Move long videos
-    if (config.moveVideos && longVideos.length > 0) {
+    if (config.moveVideos && longVideos.length > 0 && !this.shouldAbort) {
       const moveOperationText = isDryRun ? 'Simulating video moves' : 'Moving videos';
       this.emitLog(`${moveOperationText}...`);
       
       for (const video of longVideos) {
-        if (this.shouldAbort) break;
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected during video moving - stopping operation');
+          break;
+        }
         
         const fileName = path.basename(video.path);
         let dest = path.join(config.videoMoveTarget, fileName);
@@ -1090,6 +1111,10 @@ class FileOperationsService {
         // Handle duplicate names
         let counter = 1;
         while (true) {
+          if (this.shouldAbort) {
+            this.emitLog('Abort detected during duplicate check - stopping operation');
+            break;
+          }
           try {
             await fs.access(dest);
             const nameWithoutExt = path.parse(fileName).name;
@@ -1101,9 +1126,15 @@ class FileOperationsService {
           }
         }
         
+        if (this.shouldAbort) continue; // Skip to next iteration if aborted during duplicate check
+        
         if (isDryRun) {
           const videoSize = this.formatFileSize(video.size);
           const duration = await this.getVideoDuration(video.path);
+          if (this.shouldAbort) {
+            this.emitLog('Abort detected during video duration check - stopping operation');
+            break;
+          }
           const durationText = duration ? `${duration} seconds` : 'unknown duration';
           const targetFileName = path.basename(dest);
           
@@ -1111,6 +1142,10 @@ class FileOperationsService {
         } else {
           try {
             await fs.rename(video.path, dest);
+            if (this.shouldAbort) {
+              this.emitLog('Abort detected after video move - stopping operation');
+              break;
+            }
             this.emitLog(`Moved video: ${fileName} -> ${path.basename(dest)}`);
             this.addOperationLog('move', video.path, dest, video.size);
           } catch (error) {
@@ -1129,19 +1164,28 @@ class FileOperationsService {
           videosToMove: longVideos.length
         }, isDryRun);
       }
-    } else {
+    } else if (!this.shouldAbort) {
       this.emitLog('Video moving disabled or no videos to move');
     }
     
     // Delete empty folders
-    if (config.deleteEmptyFolders && emptyFolders.length > 0) {
+    if (config.deleteEmptyFolders && emptyFolders.length > 0 && !this.shouldAbort) {
       const folderOperationText = isDryRun ? 'Simulating empty folder deletion' : 'Moving empty folders to trash';
       this.emitLog(`${folderOperationText}...`);
       
       for (const folder of emptyFolders) {
-        if (this.shouldAbort) break;
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected during folder deletion - stopping operation');
+          break;
+        }
         
         await this.removeFileWithChoice(folder.path, 'empty folder', isDryRun);
+        
+        // Check abort flag again after async operation
+        if (this.shouldAbort) {
+          this.emitLog('Abort detected after folder deletion - stopping operation');
+          break;
+        }
         
         // Update progress
         totalProcessed++;
@@ -1154,11 +1198,18 @@ class FileOperationsService {
           videosToMove: longVideos.length
         }, isDryRun);
       }
-    } else {
+    } else if (!this.shouldAbort) {
       this.emitLog('Empty folder deletion disabled or no empty folders found');
     }
     
     this.isRunning = false;
+    
+    // Check if operation was aborted
+    if (this.shouldAbort) {
+      this.emitLog('Cleanup operation was aborted by user');
+      this.emitStageStatus('aborted', {}, isDryRun);
+      return; // Exit early, don't emit 'done' status
+    }
     
     const completionText = isDryRun ? 'Dry run completed successfully! No files were modified.' : 'Cleanup completed successfully!';
     this.emitLog(completionText);
