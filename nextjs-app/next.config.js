@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    outputFileTracingRoot: require('path').join(__dirname, '..'),
     experimental: {
         optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
         // Optimize CSS loading
-        optimizeCss: true,
+        optimizeCss: false,
     },
     // Server external packages (moved from experimental)
     serverExternalPackages: ['socket.io-client'],
